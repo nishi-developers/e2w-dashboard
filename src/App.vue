@@ -29,25 +29,55 @@
     <br>
     <br>
     <div id="table"></div>
+    <seat-table :formation="formation" :seats="seats" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import SeatTable from './components/SeatTable.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    SeatTable
+  },
+  data() {
+    return {
+      formation: [],
+      seats: {}
+    }
+  },
+  mounted() {
+    document.getElementById('getPerformance').addEventListener('click', () => {
+      var collectionName = document.form.collectionName.value
+      var token = document.form.token.value
+      var performanceName = document.form.performanceName.value
+      if(performanceName === ''){
+        alert("PerformanceNameを入力してください")
+      }else {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', host + 'getPerformance')
+        xhr.onload = () => {
+          console.log(xhr.response)
+          const data = JSON.parse(xhr.response)
+          var formation = JSON.parse(data.formation)
+          this.formation = formation
+          this.seats = data.seats
+        }
+        xhr.send(JSON.stringify({
+          collectionName,
+          token,
+          performanceName
+        }))
+      }
+    })
   }
 }
 
 // non-vue code below
 
+const host = 'https://asia-northeast1-easy-to-wait.cloudfunctions.net/'
 document.addEventListener('DOMContentLoaded', () => {
-  const host = location.href.indexOf('localhost') !== -1 ?
-    'http://localhost:5001/easy-to-wait/asia-northeast1/' :
-    'https://asia-northeast1-easy-to-wait.cloudfunctions.net/'
   document.getElementById('makePerformance').addEventListener('click', () => {
     var collectionName = document.form.collectionName.value
     var token = document.form.token.value
@@ -107,29 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         performanceName,
         seatNumber,
         userId
-      }))
-    }
-  })
-  document.getElementById('getPerformance').addEventListener('click', () => {
-    var collectionName = document.form.collectionName.value
-    var token = document.form.token.value
-    var performanceName = document.form.performanceName.value
-    if(performanceName === ''){
-      alert("PerformanceNameを入力してください")
-    }else {
-      const xhr = new XMLHttpRequest()
-      xhr.open('POST', host + 'getPerformance')
-      xhr.onload = () => {
-        console.log(xhr.response)
-        const data = JSON.parse(xhr.response)
-        var formation = JSON.parse(data.formation)
-        console.log(formation)
-        makeTable(formation, data.seats, "table")
-      }
-      xhr.send(JSON.stringify({
-        collectionName,
-        token,
-        performanceName
       }))
     }
   })
