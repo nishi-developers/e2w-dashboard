@@ -1,37 +1,92 @@
 <template>
   <div id="app">
-    <form name="form">
-      CollectionName
-      <input type="text" name="collectionName" />
-      <br />Token
-      <input type="password" name="token" />
-      <br />
-      <br />PerformanceName
-      <input type="text" name="performanceName" />
-      <br />SeatNumber
-      <input type="number" name="seatNumber" min="0" />
-      <br />UserId
-      <input type="text" name="userId" />
-      <br />
-      <br />Formation
-      <br />
-      <textarea name="formation"></textarea>
-    </form>
-    <br />
-    <button id="makePerformance">makePerformance</button>
-    <button id="setReservation">setReservation</button>
-    <button id="getPerformance">getPerformance</button>
-    <button id="getPerformanceList">getPerformanceList</button>
-    <br />
-    <br />
-    <div id="table"></div>
+    <v-app>
+      <v-form v-model="valid">
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="collectionName"
+                :rules="[rules.required]"
+                label="CollectionName"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="token"
+                :rules="[rules.required]"
+                :type="password"
+                label="Token"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="performanceName"
+                :rules="[rules.required]"
+                label="PerformanceName"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-menu
+                ref="menu"
+                v-model="menu"
+                :close-on-content-click="false"
+                :return-value.sync="date"
+                transition="scale-transition"
+                offset-y
+                full-width
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field v-model="date" label="Date" readonly v-on="on"></v-text-field>
+                </template>
+                <v-date-picker v-model="date" no-title scrollable>
+                  <div class="flex-grow-1"></div>
+                  <v-btn text color="primary" @click="menu=false">Cancel</v-btn>
+                  <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field v-model.number="seatNumber" label="SeatNumber" type="number" min="0"></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field v-model="userId" label="UserID"></v-text-field>
+            </v-col>
+          </v-row>
+          <v-textarea v-model="formation_str" label="Formation"></v-textarea>
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-btn @click="makePerformance()">makePerformance</v-btn>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-btn @click="setReservation()">setReservation</v-btn>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-btn @click="getPerformance()">getPerformance</v-btn>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-btn @click="getPerformanceList()">getPerformanceList</v-btn>
+            </v-col>
+          </v-row>
+          <seat-table :formation="formation" :seats="seats" />
+        </v-container>
+      </v-form>
+    </v-app>
     <seat-table :formation="formation" :seats="seats" />
   </div>
 </template>
 
 <script>
+import Vue from "vue";
+import Vuetify from "vuetify";
+import "vuetify/dist/vuetify.min.css";
+Vue.use(Vuetify);
 import SeatTable from "./components/SeatTable.vue";
-
 export default {
   name: "app",
   components: {
@@ -40,15 +95,28 @@ export default {
   data() {
     return {
       formation: [],
-      seats: {}
+      seats: {},
+      valid: false,
+      collectionName: "",
+      collectionNameRules: [v => !!v || "CollectionName is required"],
+      token: "",
+      tokenRules: [v => !!v || "Token is required"],
+      password: "Password",
+      token: "",
+      rules: {
+        required: value => !!value || "Required."
+      },
+      performanceName: "",
+      seatNumber: 0,
+      userId: "",
+      formation_str: "",
+      date: new Date().toISOString().substr(0, 10),
+      menu: false
     };
   },
-  mounted() {
-    document.getElementById("getPerformance").addEventListener("click", () => {
-      var collectionName = document.form.collectionName.value;
-      var token = document.form.token.value;
-      var performanceName = document.form.performanceName.value;
-      if (performanceName === "") {
+  methods: {
+    getPerformance() {
+      if (this.performanceName === "") {
         alert("PerformanceNameを入力してください");
       } else {
         const xhr = new XMLHttpRequest();
@@ -56,86 +124,92 @@ export default {
         xhr.onload = () => {
           console.log(xhr.response);
           const data = JSON.parse(xhr.response);
-          var formation = JSON.parse(data.formation);
-          this.formation = formation;
+          this.formation = JSON.parse(data.formation);
           this.seats = data.seats;
         };
         xhr.send(
           JSON.stringify({
-            collectionName,
-            token,
-            performanceName
+            collectionName: this.collectionName,
+            token: this.token,
+            performanceName: this.performanceName
           })
         );
       }
-    });
+    },
+    makePerformance() {
+      if (this.performanceName === "") {
+        alert("PerformanceNameを入力してください");
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", host + "makePerformance");
+        xhr.onload = () => {
+          console.log(xhr.response);
+        };
+        xhr.send(
+          JSON.stringify({
+            collectionName: this.collectionName,
+            token: this.token,
+            performanceName: this.performanceName,
+            formation: this.formation_str,
+            date: this.date
+          })
+        );
+      }
+    },
+    setReservation() {
+      let flag = false;
+      if (this.performanceName === "") {
+        alert("PerformanceNameを入力してください");
+        flag = true;
+      }
+      if (this.userId === "") {
+        alert("UserIdを入力してください");
+        flag = true;
+      }
+      if (!flag) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", host + "setReservation");
+        xhr.onload = () => {
+          console.log(xhr.response);
+        };
+        xhr.send(
+          JSON.stringify({
+            collectionName: this.collectionName,
+            token: this.token,
+            performanceName: this.performanceName,
+            seatNumber: this.seatNumber,
+            seat: { type: "line", id: this.userId }
+          })
+        );
+        console.log(
+          JSON.stringify({
+            collectionName: this.collectionName,
+            token: this.token,
+            performanceName: this.performanceName,
+            seatNumber: this.seatNumber,
+            seat: { type: "line", id: this.userId }
+          })
+        );
+      }
+    },
+    getPerformanceList() {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", host + "getPerformanceList");
+      xhr.onload = () => {
+        console.log(xhr.response);
+      };
+      xhr.send(
+        JSON.stringify({
+          collectionName: this.collectionName,
+          token: this.token
+        })
+      );
+    }
   }
 };
-
 // non-vue code below
-
 const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("makePerformance").addEventListener("click", () => {
-    var collectionName = document.form.collectionName.value;
-    var token = document.form.token.value;
-    var performanceName = document.form.performanceName.value;
-    var formation = document.form.formation.value;
-    if (performanceName === "") {
-      alert("PerformanceNameを入力してください");
-    } else {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "makePerformance");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token,
-          performanceName,
-          formation
-        })
-      );
-    }
-  });
-  document.getElementById("setReservation").addEventListener("click", () => {
-    var collectionName = document.form.collectionName.value;
-    var token = document.form.token.value;
-    var performanceName = document.form.performanceName.value;
-    var seatNumber_str = document.form.seatNumber.value;
-    var userId = document.form.userId.value;
-    var flag = false;
-    if (performanceName === "") {
-      alert("PerformanceNameを入力してください");
-      flag = true;
-    }
-    if (seatNumber_str === "") {
-      alert("SeatNumberを入力してください");
-      flag = true;
-    }
-    if (userId === "") {
-      alert("UserIdを入力してください");
-      flag = true;
-    }
-    var seatNumber = parseInt(seatNumber_str);
-    if (!flag) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "setReservation");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token,
-          performanceName,
-          seatNumber,
-          userId
-        })
-      );
-    }
-  });
   document
     .getElementById("getPerformanceList")
     .addEventListener("click", () => {
@@ -181,6 +255,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
-#app {
-}
 </style>
