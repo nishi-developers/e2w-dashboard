@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <v-app>
-      <v-form v-model="valid">
+      <v-form v-model="valid" ref="form">
         <v-container>
           <v-row>
             <v-col cols="12" md="6">
@@ -82,6 +82,7 @@
 </template>
 
 <script>
+const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
@@ -116,6 +117,8 @@ export default {
   },
   methods: {
     getPerformance() {
+      if (this.$refs.form.validate()) {
+      }
       if (this.performanceName === "") {
         alert("PerformanceNameを入力してください");
       } else {
@@ -181,15 +184,6 @@ export default {
             seat: { type: "line", id: this.userId }
           })
         );
-        console.log(
-          JSON.stringify({
-            collectionName: this.collectionName,
-            token: this.token,
-            performanceName: this.performanceName,
-            seatNumber: this.seatNumber,
-            seat: { type: "line", id: this.userId }
-          })
-        );
       }
     },
     getPerformanceList() {
@@ -207,51 +201,6 @@ export default {
     }
   }
 };
-// non-vue code below
-const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
-document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("getPerformanceList")
-    .addEventListener("click", () => {
-      var collectionName = document.form.collectionName.value;
-      var token = document.form.token.value;
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "getPerformanceList");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token
-        })
-      );
-    });
-  const fillStyles = ["#b2bec3", "#e84393", "#00cec9"];
-  function makeTable(data, seats, tableId) {
-    var obj = document.getElementById(tableId);
-    obj.innerHTML = "";
-    var table = document.createElement("table");
-    table.style.width = (30 * data[0].length).toString() + "px";
-    for (let i = 0; i < data.length; i++) {
-      let row = table.insertRow(-1);
-      for (let j = 0; j < data[0].length; j++) {
-        let cell = row.insertCell(-1);
-        const userId = seats[(i * data[0].length + j + 1).toString()];
-        let colorIndex;
-        if (typeof userId !== "undefined") {
-          colorIndex = 0;
-          cell.textContent = userId;
-        } else {
-          colorIndex = data[i][j];
-          cell.textContent = "\u00a0";
-        }
-        cell.style.backgroundColor = fillStyles[colorIndex];
-      }
-    }
-    obj.appendChild(table);
-  }
-});
 </script>
 
 <style>
