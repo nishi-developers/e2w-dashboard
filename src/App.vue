@@ -30,30 +30,30 @@
       <!--カード!-->
       <v-card width="90%" class="mx-auto">
         <v-tabs vertical>
-          <v-tab
-            class="text-left"
-            v-for="item in Object.keys(this.performanceList)"
-            :key="item"
-            link
-          >
+          <v-tab v-for="item in Object.keys(this.performanceList)" :key="item" link>
             <!--<v-icon left>mdi-account</v-icon>!-->
             {{item}}
           </v-tab>
+          <v-tab v-if="Object.keys(this.performanceList).length > 0">
+            <i>
+              <b>＋ 追加...</b>
+            </i>
+          </v-tab>
           <v-tab-item v-for="item in Object.keys(this.performanceList)" :key="item">
             <v-card flat>
-              <seat-table class="mx-auto mt-10" :formation="formations[item]" :seats="seats[item]" />
+              <seat-table
+                class="mx-auto mt-10"
+                :style="{cursor:'default'}"
+                :formation="formations[item]"
+                :seats="seats[item]"
+              />
               <v-container width="90%" class="mx-auto">
                 <v-row class="mt-5">
                   <v-col cols="12" sm="5" md="5">
-                    <v-text-field
-                      v-model.number="seatNumber"
-                      label="SeatNumber"
-                      type="number"
-                      min="0"
-                    ></v-text-field>
+                    <v-text-field v-model.number="seatNumber" label="座席番号" type="number" min="0"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="5" md="5">
-                    <v-text-field v-model="userId" label="UserID"></v-text-field>
+                    <v-text-field v-model="userId" label="ユーザーID"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="2" md="2">
                     <v-btn block @click="() => {setReservation(item);update();}" height="50px">予約</v-btn>
@@ -62,51 +62,74 @@
               </v-container>
             </v-card>
           </v-tab-item>
+          <v-tab-item v-if="Object.keys(this.performanceList).length > 0">
+            <v-container>
+              <seat-table
+                class="mx-auto mt-10"
+                @cellclicked="toggle"
+                :formation="editing.formation"
+                :seats="new Object()"
+                :style="{cursor:'pointer'}"
+              />
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    v-model="performanceName"
+                    :rules="[rules.required]"
+                    label="公演名"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-menu
+                    ref="menu"
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    :return-value.sync="date"
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field v-model="date" label="日付" readonly v-on="on"></v-text-field>
+                    </template>
+                    <v-date-picker v-model="date" no-title scrollable>
+                      <div class="flex-grow-1"></div>
+                      <v-btn text color="primary" @click="menu=false">キャンセル</v-btn>
+                      <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="12" sm="3" md="3">
+                  <v-text-field
+                    @change="updateWidth()"
+                    v-model.number="editing.width"
+                    label="横"
+                    type="number"
+                    min="1"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="3" md="3">
+                  <v-text-field
+                    @change="updateHeight()"
+                    v-model.number="editing.height"
+                    label="縦"
+                    type="number"
+                    min="1"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-btn @click="() => {makePerformance();initEditForm();update();}">公演を追加</v-btn>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-tab-item>
         </v-tabs>
       </v-card>
-
-      <!--いろいろ!-->
-      <v-form v-model="valid">
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                v-model="performanceName"
-                :rules="[rules.required]"
-                label="PerformanceName"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-menu
-                ref="menu"
-                v-model="menu"
-                :close-on-content-click="false"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                full-width
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field v-model="date" label="Date" readonly v-on="on"></v-text-field>
-                </template>
-                <v-date-picker v-model="date" no-title scrollable>
-                  <div class="flex-grow-1"></div>
-                  <v-btn text color="primary" @click="menu=false">Cancel</v-btn>
-                  <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
-                </v-date-picker>
-              </v-menu>
-            </v-col>
-          </v-row>
-          <v-textarea v-model="formation_str" label="Formation"></v-textarea>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-btn @click="makePerformance()">makePerformance</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-form>
+      <br />
     </v-app>
   </div>
 </template>
@@ -141,7 +164,12 @@ export default {
       seatNumber: 0,
       userId: "",
       formation_str: "",
-      date: new Date().toISOString().substr(0, 10),
+      editing: {
+        formation: [[]],
+        width: 0,
+        height: 0
+      },
+      date: Object,
       menu: false,
       right: null,
       performanceList: []
@@ -154,6 +182,17 @@ export default {
           this.getPerformance(performanceName);
         }
       });
+    },
+    initEditForm() {
+      this.editing.formation = [
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]
+      ];
+      this.editing.width = 5;
+      this.editing.height = 3;
+      this.performanceName = "";
+      this.date = new Date().toISOString().substr(0, 10);
     },
     getPerformance(performanceName) {
       const xhr = new XMLHttpRequest();
@@ -190,7 +229,7 @@ export default {
             collectionName: this.collectionName,
             token: this.token,
             performanceName: this.performanceName,
-            formation: this.formation_str,
+            formation: JSON.stringify(this.editing.formation),
             date: this.date
           })
         );
@@ -235,7 +274,48 @@ export default {
           })
         );
       });
+    },
+    updateWidth() {
+      if (this.editing.width > this.editing.formation[0].length) {
+        for (let i = 0; i < this.editing.formation.length; i++) {
+          this.editing.formation[i] = this.editing.formation[i].concat(
+            new Array(
+              this.editing.width - this.editing.formation[i].length
+            ).fill(1)
+          );
+        }
+        this.editing.formation.splice(); //This code is necessary to reflect changes
+      } else {
+        for (let i = 0; i < this.editing.formation.length; i++) {
+          this.editing.formation[i] = this.editing.formation[i].slice(
+            0,
+            this.editing.width
+          );
+        }
+        this.editing.formation.splice(); //This code is necessary to reflect changes
+      }
+    },
+    updateHeight() {
+      if (this.editing.height > this.editing.formation.length) {
+        while (this.editing.height !== this.editing.formation.length) {
+          this.editing.formation.push(
+            new Array(this.editing.formation[0].length).fill(1)
+          );
+        }
+      } else {
+        this.editing.formation = this.editing.formation.slice(
+          0,
+          this.editing.height
+        );
+      }
+    },
+    toggle(i, j) {
+      this.editing.formation[i][j] = (this.editing.formation[i][j] + 1) % 3;
+      this.editing.formation.splice();
     }
+  },
+  mounted: function() {
+    this.initEditForm();
   }
 };
 </script>
