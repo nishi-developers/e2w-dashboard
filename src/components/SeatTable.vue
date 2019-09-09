@@ -29,9 +29,9 @@ export default {
   },
   methods: {
     text(index) {
-      const userId = this.seats[index];
-      if (userId) {
-        return userId;
+      const seat = this.seats[index];
+      if (seat) {
+        return seat["id"];
       }
       return "";
     },
