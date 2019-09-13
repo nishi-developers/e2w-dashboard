@@ -31,7 +31,7 @@
       <main-card
         :info="info"
         @addPerformance="() => {this.makePerformance();this.initEditForm();this.update();}"
-        @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;setReservation(item);if(!flag)update();}"
+        @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
       ></main-card>
       <br />
     </v-app>
@@ -148,16 +148,16 @@ export default {
       }
       if (!flag) {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "setReservation");
+        xhr.open("POST", host + "setReservation2");
         xhr.onload = () => {
           console.log(xhr.response);
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.collectionName,
-            token: this.token,
+            collectionName: this.info.collectionName,
+            token: this.info.token,
             performanceName: performanceName,
-            seatNumber: this.seatNumber,
+            seatNumber: this.info.seatNumber,
             seat: { type: "line", id: this.info.userId }
           })
         );
