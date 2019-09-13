@@ -30,7 +30,7 @@
       <!--カード!-->
       <main-card
         :info="info"
-        @addPerformance="() => {this.makePerformance();this.initEditForm();this.update();}"
+        @addPerformance="(performanceName, date, formation) => {this.makePerformance(performanceName, date, formation);this.update();}"
         @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
       ></main-card>
       <br />
@@ -57,17 +57,10 @@ export default {
         seats: [],
         collectionName: "",
         token: "",
-        performanceName: "",
-        seatNumber: Number,
+        seatNumber: 0,
         userId: "",
         formation_str: "",
-        performanceList: [],
-        editing: {
-          formation: [[]],
-          width: 0,
-          height: 0
-        },
-        date: Object
+        performanceList: []
       },
       valid: false,
       collectionNameRules: [v => !!v || "CollectionName is required"],
@@ -76,7 +69,6 @@ export default {
       rules: {
         required: value => !!value || "Required."
       },
-      menu: false,
       right: null
     };
   },
@@ -87,17 +79,6 @@ export default {
           this.getPerformance(performanceName);
         }
       });
-    },
-    initEditForm() {
-      this.info.editing.formation = [
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1]
-      ];
-      this.info.editing.width = 5;
-      this.info.editing.height = 3;
-      this.info.performanceName = "";
-      this.info.date = new Date().toISOString().substr(0, 10);
     },
     getPerformance(performanceName) {
       const xhr = new XMLHttpRequest();
@@ -120,7 +101,7 @@ export default {
         })
       );
     },
-    makePerformance() {
+    makePerformance(performanceName, date, formation) {
       if (this.performanceName === "") {
         alert("PerformanceNameを入力してください");
       } else {
@@ -133,9 +114,9 @@ export default {
           JSON.stringify({
             collectionName: this.info.collectionName,
             token: this.info.token,
-            performanceName: this.info.performanceName,
-            formation: JSON.stringify(this.info.editing.formation),
-            date: this.info.date
+            performanceName: performanceName,
+            formation: JSON.stringify(formation),
+            date: date
           })
         );
       }
@@ -181,9 +162,6 @@ export default {
         );
       });
     }
-  },
-  mounted: function() {
-    this.initEditForm();
   }
 };
 </script>

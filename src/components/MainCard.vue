@@ -42,14 +42,14 @@
           <seat-table
             class="mx-auto mt-10"
             @cellclicked="toggle"
-            :formation="info.editing.formation"
+            :formation="editing.formation"
             :seats="new Object()"
             :style="{cursor:'pointer'}"
           />
           <v-row>
             <v-col cols="12" md="3">
               <v-text-field
-                v-model="info.performanceName"
+                v-model="editing.performanceName"
                 :rules="[rules.required]"
                 label="公演名"
                 required
@@ -57,46 +57,36 @@
             </v-col>
             <v-col cols="12" md="3">
               <v-menu
-                ref="info.menu"
-                v-model="info.menu"
+                ref="menu"
+                v-model="menu"
                 :close-on-content-click="false"
-                :return-value.sync="info.date"
+                :return-value.sync="editing.date"
                 transition="scale-transition"
                 offset-y
                 min-width="290px"
               >
                 <template v-slot:activator="{ on }">
-                  <v-text-field v-model="info.date" label="日付" readonly v-on="on"></v-text-field>
+                  <v-text-field v-model="editing.date" label="日付" readonly v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="info.date" no-title scrollable>
+                <v-date-picker v-model="editing.date" no-title scrollable>
                   <div class="flex-grow-1"></div>
                   <v-btn text color="primary" @click="menu=false">キャンセル</v-btn>
-                  <v-btn text color="primary" @click="$refs.menu.save(info.date)">OK</v-btn>
+                  <v-btn text color="primary" @click="$refs.menu.save(editing.date)">OK</v-btn>
                 </v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="12" sm="3" md="3">
-              <v-text-field
-                @change="updateWidth()"
-                v-model.number="info.editing.width"
-                label="横"
-                type="number"
-                min="1"
-              ></v-text-field>
+              <v-text-field v-model.number="editing.width" label="横" type="number" min="1"></v-text-field>
             </v-col>
             <v-col cols="12" sm="3" md="3">
-              <v-text-field
-                @change="updateHeight()"
-                v-model.number="info.editing.height"
-                label="縦"
-                type="number"
-                min="1"
-              ></v-text-field>
+              <v-text-field v-model.number="editing.height" label="縦" type="number" min="1"></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12" md="3">
-              <v-btn @click="$emit('addPerformance')">公演を追加</v-btn>
+              <v-btn
+                @click="() => {$emit('addPerformance', editing.performanceName, editing.date, editing.formation);initEditForm();}"
+              >公演を追加</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -120,51 +110,65 @@ export default {
         required: value => !!value || "Required."
       },
       seatNumbers: [],
-      userIds: []
+      userIds: [],
+      menu: false,
+      editing: {
+        performanceName: "",
+        formation: [[]],
+        width: 0,
+        height: 0,
+        date: null
+      }
     };
   },
   methods: {
-    toggle(i, j) {
-      this.info.editing.formation[i][j] =
-        (this.info.editing.formation[i][j] + 1) % 3;
-      this.info.editing.formation.splice();
+    initEditForm() {
+      this.editing.formation = [
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]
+      ];
+      this.editing.width = 5;
+      this.editing.height = 3;
+      this.editing.performanceName = "";
+      this.editing.date = new Date().toISOString().substr(0, 10);
     },
-    updateWidth() {
-      if (this.info.editing.width > this.info.editing.formation[0].length) {
-        for (let i = 0; i < this.info.editing.formation.length; i++) {
-          this.info.editing.formation[i] = this.info.editing.formation[
-            i
-          ].concat(
-            new Array(
-              this.info.editing.width - this.info.editing.formation[i].length
-            ).fill(1)
+    toggle(i, j) {
+      this.editing.formation[i][j] = (this.editing.formation[i][j] + 1) % 3;
+      this.editing.formation.splice();
+    }
+  },
+  mounted: function() {
+    this.initEditForm();
+  },
+  watch: {
+    "editing.width": function(newVal, oldVal) {
+      if (newVal > oldVal) {
+        for (let i = 0; i < this.editing.formation.length; i++) {
+          this.editing.formation[i] = this.editing.formation[i].concat(
+            new Array(newVal - this.editing.formation[i].length).fill(1)
           );
         }
-        this.info.editing.formation.splice(); //This code is necessary to reflect changes
+        this.editing.formation.splice(); //This code is necessary to reflect changes
       } else {
-        for (let i = 0; i < this.info.editing.formation.length; i++) {
-          this.info.editing.formation[i] = this.info.editing.formation[i].slice(
+        for (let i = 0; i < this.editing.formation.length; i++) {
+          this.editing.formation[i] = this.editing.formation[i].slice(
             0,
-            this.info.editing.width
+            newVal
           );
         }
-        this.info.editing.formation.splice(); //This code is necessary to reflect changes
+        this.editing.formation.splice(); //This code is necessary to reflect changes
       }
     },
-    updateHeight() {
-      if (this.info.editing.height > this.info.editing.formation.length) {
-        while (
-          this.info.editing.height !== this.info.editing.formation.length
-        ) {
-          this.info.editing.formation.push(
-            new Array(this.info.editing.formation[0].length).fill(1)
+    "editing.height": function(newVal, oldVal) {
+      if (newVal > oldVal) {
+        while (this.editing.formation.length < newVal) {
+          this.editing.formation.push(
+            new Array(this.editing.formation[0].length).fill(1)
           );
         }
       } else {
-        this.info.editing.formation = this.info.editing.formation.slice(
-          0,
-          this.info.editing.height
-        );
+        this.editing.formation = this.editing.formation.slice(0, newVal);
       }
     }
   }
