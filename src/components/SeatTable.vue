@@ -4,8 +4,9 @@
       <td
         class="cell"
         v-for="(cell, j) in row"
-        :style="{ backgroundColor: backgroundColor(cell, i * row.length + j) , color: textColor(cell) }"
+        :style="{ backgroundColor: backgroundColor(cell, i * row.length + j) , color: textColor(cell)}"
         @mouseover="setActive(i * row.length + j)"
+        @click="$emit('cellclicked', i, j)"
       >
         {{ i * row.length + j}}
         <div class="fukidashi" v-if="isActive(i * row.length + j)">{{ text(i * row.length + j) }}</div>
@@ -29,9 +30,9 @@ export default {
   },
   methods: {
     text(index) {
-      const userId = this.seats[index];
-      if (userId) {
-        return userId;
+      const seat = this.seats[index];
+      if (seat) {
+        return seat["id"];
       }
       return "";
     },
@@ -48,8 +49,7 @@ export default {
     setActive(index) {
       this.activenum = index;
     }
-  },
-  watch: {}
+  }
 };
 </script>
 

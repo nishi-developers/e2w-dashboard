@@ -1,186 +1,170 @@
 <template>
   <div id="app">
-    <form name="form">
-      CollectionName
-      <input type="text" name="collectionName" />
-      <br />Token
-      <input type="password" name="token" />
+    <v-app>
+      <v-form v-model="valid">
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="5" sm="5">
+              <v-text-field
+                v-model="info.collectionName"
+                :rules="[rules.required]"
+                label="CollectionName"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="5" sm="5">
+              <v-text-field
+                v-model="info.token"
+                :rules="[rules.required]"
+                :type="password"
+                label="Token"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2" sm="2">
+              <v-btn block @click="update()" height="50px">OK</v-btn>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-form>
+
+      <!--カード!-->
+      <main-card
+        :info="info"
+        @addPerformance="(performanceName, date, formation) => {this.makePerformance(performanceName, date, formation);this.update();}"
+        @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
+      ></main-card>
       <br />
-      <br />PerformanceName
-      <input type="text" name="performanceName" />
-      <br />SeatNumber
-      <input type="number" name="seatNumber" min="0" />
-      <br />UserId
-      <input type="text" name="userId" />
-      <br />
-      <br />Formation
-      <br />
-      <textarea name="formation"></textarea>
-    </form>
-    <br />
-    <button id="makePerformance">makePerformance</button>
-    <button id="setReservation">setReservation</button>
-    <button id="getPerformance">getPerformance</button>
-    <button id="getPerformanceList">getPerformanceList</button>
-    <br />
-    <br />
-    <div id="table"></div>
-    <seat-table :formation="formation" :seats="seats" />
+    </v-app>
   </div>
 </template>
 
 <script>
-import SeatTable from "./components/SeatTable.vue";
-
+const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
+import Vue from "vue";
+import Vuetify from "vuetify";
+import "vuetify/dist/vuetify.min.css";
+Vue.use(Vuetify);
+import MainCard from "./components/MainCard.vue";
 export default {
   name: "app",
   components: {
-    SeatTable
+    MainCard
   },
   data() {
     return {
-      formation: [],
-      seats: {}
+      info: {
+        formations: [],
+        seats: [],
+        collectionName: "",
+        token: "",
+        seatNumber: 0,
+        userId: "",
+        formation_str: "",
+        performanceList: []
+      },
+      valid: false,
+      collectionNameRules: [v => !!v || "CollectionName is required"],
+      tokenRules: [v => !!v || "Token is required"],
+      password: "Password",
+      rules: {
+        required: value => !!value || "Required."
+      },
+      right: null
     };
   },
-  mounted() {
-    document.getElementById("getPerformance").addEventListener("click", () => {
-      var collectionName = document.form.collectionName.value;
-      var token = document.form.token.value;
-      var performanceName = document.form.performanceName.value;
-      if (performanceName === "") {
+  methods: {
+    update() {
+      this.getPerformanceList().then(() => {
+        for (let performanceName in this.info.performanceList) {
+          this.getPerformance(performanceName);
+        }
+      });
+    },
+    getPerformance(performanceName) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", host + "getPerformance");
+      xhr.onload = () => {
+        console.log(xhr.response);
+        const data = JSON.parse(xhr.response);
+        this.info.formations[performanceName] =
+          typeof data.formation === "undefined" || data.formation === ""
+            ? []
+            : JSON.parse(data.formation);
+        this.info.seats[performanceName] = data.seats;
+        this.info.seats.splice(); //This code is necessary to reflect changes
+      };
+      xhr.send(
+        JSON.stringify({
+          collectionName: this.info.collectionName,
+          token: this.info.token,
+          performanceName: performanceName
+        })
+      );
+    },
+    makePerformance(performanceName, date, formation) {
+      if (this.performanceName === "") {
         alert("PerformanceNameを入力してください");
       } else {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "getPerformance");
+        xhr.open("POST", host + "makePerformance");
         xhr.onload = () => {
           console.log(xhr.response);
-          const data = JSON.parse(xhr.response);
-          var formation = JSON.parse(data.formation);
-          this.formation = formation;
-          this.seats = data.seats;
         };
         xhr.send(
           JSON.stringify({
-            collectionName,
-            token,
-            performanceName
+            collectionName: this.info.collectionName,
+            token: this.info.token,
+            performanceName: performanceName,
+            formation: JSON.stringify(formation),
+            date: date
           })
         );
       }
-    });
+    },
+    setReservation(performanceName) {
+      let flag = false;
+      if (this.info.userId === "") {
+        alert("UserIdを入力してください");
+        flag = true;
+      }
+      if (!flag) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", host + "setReservation2");
+        xhr.onload = () => {
+          console.log(xhr.response);
+        };
+        xhr.send(
+          JSON.stringify({
+            collectionName: this.info.collectionName,
+            token: this.info.token,
+            performanceName: performanceName,
+            seatNumber: this.info.seatNumber,
+            seat: { type: "line", id: this.info.userId }
+          })
+        );
+      }
+      return flag;
+    },
+    getPerformanceList() {
+      return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", host + "getPerformanceList");
+        xhr.onload = () => {
+          console.log(xhr.response);
+          this.info.performanceList = JSON.parse(xhr.response);
+          resolve();
+        };
+        xhr.send(
+          JSON.stringify({
+            collectionName: this.info.collectionName,
+            token: this.info.token
+          })
+        );
+      });
+    }
   }
 };
-
-// non-vue code below
-
-const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("makePerformance").addEventListener("click", () => {
-    var collectionName = document.form.collectionName.value;
-    var token = document.form.token.value;
-    var performanceName = document.form.performanceName.value;
-    var formation = document.form.formation.value;
-    if (performanceName === "") {
-      alert("PerformanceNameを入力してください");
-    } else {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "makePerformance");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token,
-          performanceName,
-          formation
-        })
-      );
-    }
-  });
-  document.getElementById("setReservation").addEventListener("click", () => {
-    var collectionName = document.form.collectionName.value;
-    var token = document.form.token.value;
-    var performanceName = document.form.performanceName.value;
-    var seatNumber_str = document.form.seatNumber.value;
-    var userId = document.form.userId.value;
-    var flag = false;
-    if (performanceName === "") {
-      alert("PerformanceNameを入力してください");
-      flag = true;
-    }
-    if (seatNumber_str === "") {
-      alert("SeatNumberを入力してください");
-      flag = true;
-    }
-    if (userId === "") {
-      alert("UserIdを入力してください");
-      flag = true;
-    }
-    var seatNumber = parseInt(seatNumber_str);
-    if (!flag) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "setReservation");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token,
-          performanceName,
-          seatNumber,
-          userId
-        })
-      );
-    }
-  });
-  document
-    .getElementById("getPerformanceList")
-    .addEventListener("click", () => {
-      var collectionName = document.form.collectionName.value;
-      var token = document.form.token.value;
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "getPerformanceList");
-      xhr.onload = () => {
-        console.log(xhr.response);
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName,
-          token
-        })
-      );
-    });
-  const fillStyles = ["#b2bec3", "#e84393", "#00cec9"];
-  function makeTable(data, seats, tableId) {
-    var obj = document.getElementById(tableId);
-    obj.innerHTML = "";
-    var table = document.createElement("table");
-    table.style.width = (30 * data[0].length).toString() + "px";
-    for (let i = 0; i < data.length; i++) {
-      let row = table.insertRow(-1);
-      for (let j = 0; j < data[0].length; j++) {
-        let cell = row.insertCell(-1);
-        const userId = seats[(i * data[0].length + j + 1).toString()];
-        let colorIndex;
-        if (typeof userId !== "undefined") {
-          colorIndex = 0;
-          cell.textContent = userId;
-        } else {
-          colorIndex = data[i][j];
-          cell.textContent = "\u00a0";
-        }
-        cell.style.backgroundColor = fillStyles[colorIndex];
-      }
-    }
-    obj.appendChild(table);
-  }
-});
 </script>
 
 <style>
-#app {
-}
 </style>
