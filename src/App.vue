@@ -2,12 +2,12 @@
   <div id="app">
     <v-app>
       <div v-if="logined">
-        <v-form v-model="valid">
+        <!--<v-form v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="12" md="5" sm="5">
                 <v-text-field
-                  v-model="info.collectionName"
+                  v-model="loginData.collectionName"
                   :rules="[rules.required]"
                   label="CollectionName"
                   required
@@ -15,7 +15,7 @@
               </v-col>
               <v-col cols="12" md="5" sm="5">
                 <v-text-field
-                  v-model="info.token"
+                  v-model="loginData.token"
                   :rules="[rules.required]"
                   :type="password"
                   label="Token"
@@ -26,7 +26,7 @@
               </v-col>
             </v-row>
           </v-container>
-        </v-form>
+        </v-form>-->
 
         <!--カード!-->
         <main-card
@@ -74,8 +74,6 @@ export default {
       info: {
         formations: [],
         seats: [],
-        collectionName: "",
-        token: "",
         seatNumber: 0,
         userId: "",
         formation_str: "",
@@ -95,31 +93,38 @@ export default {
   methods: {
     update() {
       this.getPerformanceList().then(() => {
+        let promises = [];
         for (let performanceName in this.info.performanceList) {
-          this.getPerformance(performanceName);
+          promises.push(this.getPerformance(performanceName));
         }
+        Promise.all(promises).then(() => {
+          this.logined = true;
+        });
       });
     },
     getPerformance(performanceName) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "getPerformance");
-      xhr.onload = () => {
-        console.log(xhr.response);
-        const data = JSON.parse(xhr.response);
-        this.info.formations[performanceName] =
-          typeof data.formation === "undefined" || data.formation === ""
-            ? []
-            : JSON.parse(data.formation);
-        this.info.seats[performanceName] = data.seats;
-        this.info.seats.splice(); //This code is necessary to reflect changes
-      };
-      xhr.send(
-        JSON.stringify({
-          collectionName: this.info.collectionName,
-          token: this.info.token,
-          performanceName: performanceName
-        })
-      );
+      return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", host + "getPerformance");
+        xhr.onload = () => {
+          console.log(xhr.response);
+          const data = JSON.parse(xhr.response);
+          this.info.formations[performanceName] =
+            typeof data.formation === "undefined" || data.formation === ""
+              ? []
+              : JSON.parse(data.formation);
+          this.info.seats[performanceName] = data.seats;
+          this.info.seats.splice(); //This code is necessary to reflect changes
+          resolve();
+        };
+        xhr.send(
+          JSON.stringify({
+            collectionName: this.loginData.collectionName,
+            token: this.loginData.token,
+            performanceName: performanceName
+          })
+        );
+      });
     },
     makePerformance(performanceName, date, formation) {
       if (this.performanceName === "") {
@@ -132,8 +137,8 @@ export default {
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token,
+            collectionName: this.loginData.collectionName,
+            token: this.loginData.token,
             performanceName: performanceName,
             formation: JSON.stringify(formation),
             date: date
@@ -155,8 +160,8 @@ export default {
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token,
+            collectionName: this.loginData.collectionName,
+            token: this.loginData.token,
             performanceName: performanceName,
             seatNumber: this.info.seatNumber,
             seat: { type: "line", id: this.info.userId }
@@ -176,8 +181,8 @@ export default {
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token
+            collectionName: this.loginData.collectionName,
+            token: this.loginData.token
           })
         );
       });

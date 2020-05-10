@@ -19,7 +19,18 @@
           label="Token"
         ></v-text-field>
         <br />
-        <v-btn block @click="$emit('done')" height="50px">ログイン</v-btn>
+        <v-btn
+          block
+          @click="
+            $emit('done');
+            loading = true;
+          "
+          height="50px"
+          color="primary"
+          dark
+          :loading="loading"
+          >ログイン</v-btn
+        >
       </v-form>
     </v-card>
   </v-container>
@@ -34,7 +45,8 @@ export default {
     return {
       rules: {
         required: value => !!value || "Required."
-      }
+      },
+      loading: false
     };
   }
 };
