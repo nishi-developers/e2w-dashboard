@@ -1,39 +1,52 @@
 <template>
   <div id="app">
     <v-app>
-      <v-form v-model="valid">
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="5" sm="5">
-              <v-text-field
-                v-model="info.collectionName"
-                :rules="[rules.required]"
-                label="CollectionName"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="5" sm="5">
-              <v-text-field
-                v-model="info.token"
-                :rules="[rules.required]"
-                :type="password"
-                label="Token"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="2" sm="2">
-              <v-btn block @click="update()" height="50px">OK</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-form>
+      <div v-if="logined">
+        <v-form v-model="valid">
+          <v-container>
+            <v-row>
+              <v-col cols="12" md="5" sm="5">
+                <v-text-field
+                  v-model="info.collectionName"
+                  :rules="[rules.required]"
+                  label="CollectionName"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="5" sm="5">
+                <v-text-field
+                  v-model="info.token"
+                  :rules="[rules.required]"
+                  :type="password"
+                  label="Token"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="2" sm="2">
+                <v-btn block @click="update()" height="50px">OK</v-btn>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-form>
 
-      <!--カード!-->
-      <main-card
-        :info="info"
-        @addPerformance="(performanceName, date, formation) => {this.makePerformance(performanceName, date, formation);this.update();}"
-        @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
-      ></main-card>
-      <br />
+        <!--カード!-->
+        <main-card
+          :info="info"
+          @addPerformance="
+            (performanceName, date, formation) => {
+              this.makePerformance(performanceName, date, formation);
+              this.update();
+            }
+          "
+          @setReservation="
+            (item, seatNumber, userId) => {
+              this.info.seatNumber = seatNumber;
+              this.info.userId = userId;
+              if (!setReservation(item)) update();
+            }
+          "
+        ></main-card>
+      </div>
+      <login v-else v-model="loginData" @done="update()"></login>
     </v-app>
   </div>
 </template>
@@ -45,13 +58,19 @@ import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
 Vue.use(Vuetify);
 import MainCard from "./components/MainCard.vue";
+import Login from "./components/Login.vue";
 export default {
   name: "app",
   components: {
-    MainCard
+    MainCard,
+    Login
   },
   data() {
     return {
+      loginData: {
+        collectionName: "",
+        token: ""
+      },
       info: {
         formations: [],
         seats: [],
@@ -69,7 +88,8 @@ export default {
       rules: {
         required: value => !!value || "Required."
       },
-      right: null
+      right: null,
+      logined: false
     };
   },
   methods: {
@@ -166,5 +186,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>
