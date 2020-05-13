@@ -2,51 +2,35 @@
   <div id="app">
     <v-app>
       <div v-if="logined">
-        <!--<v-form v-model="valid">
-          <v-container>
-            <v-row>
-              <v-col cols="12" md="5" sm="5">
-                <v-text-field
-                  v-model="loginData.collectionName"
-                  :rules="[rules.required]"
-                  label="CollectionName"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="5" sm="5">
-                <v-text-field
-                  v-model="loginData.token"
-                  :rules="[rules.required]"
-                  :type="password"
-                  label="Token"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="2" sm="2">
-                <v-btn block @click="update()" height="50px">OK</v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-form>-->
+        <v-app-bar app color="primary" dark>
+          <v-toolbar-title class="ml-2">サイコの予約</v-toolbar-title>
 
-        <!--カード!-->
-        <main-card
-          :info="info"
-          @addPerformance="
+          <v-spacer></v-spacer>
+
+          <v-btn light @click="logout()">ログアウト</v-btn>
+        </v-app-bar>
+        <v-content>
+          <v-container fluid>
+            <main-card
+              :info="info"
+              @addPerformance="
             (performanceName, date, formation) => {
               this.makePerformance(performanceName, date, formation);
               this.update();
             }
           "
-          @setReservation="
+              @setReservation="
             (item, seatNumber, userId) => {
               this.info.seatNumber = seatNumber;
               this.info.userId = userId;
               if (!setReservation(item)) update();
             }
           "
-        ></main-card>
+            ></main-card>
+          </v-container>
+        </v-content>
       </div>
-      <login v-else v-model="loginData" @done="update()"></login>
+      <login v-else v-model="loginData" @done="update()" :failed="failed" :loading="loading"></login>
     </v-app>
   </div>
 </template>
@@ -87,20 +71,35 @@ export default {
         required: value => !!value || "Required."
       },
       right: null,
-      logined: false
+      logined: false,
+      failed: false,
+      loading: false
     };
   },
   methods: {
     update() {
-      this.getPerformanceList().then(() => {
-        let promises = [];
-        for (let performanceName in this.info.performanceList) {
-          promises.push(this.getPerformance(performanceName));
-        }
-        Promise.all(promises).then(() => {
-          this.logined = true;
+      this.loading = true;
+      this.getPerformanceList()
+        .then(() => {
+          let promises = [];
+          for (let performanceName in this.info.performanceList) {
+            promises.push(this.getPerformance(performanceName));
+          }
+          Promise.all(promises).then(() => {
+            this.logined = true;
+            this.loading = false;
+          });
+        })
+        .catch(() => {
+          this.failed = true;
+          this.loading = false;
         });
-      });
+    },
+    logout() {
+      this.loginData.collectionName = "";
+      this.loginData.token = "";
+      this.failed = false;
+      this.logined = false;
     },
     getPerformance(performanceName) {
       return new Promise(resolve => {
@@ -171,12 +170,16 @@ export default {
       return flag;
     },
     getPerformanceList() {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", host + "getPerformanceList");
         xhr.onload = () => {
           console.log(xhr.response);
-          this.info.performanceList = JSON.parse(xhr.response);
+          try {
+            this.info.performanceList = JSON.parse(xhr.response);
+          } catch (e) {
+            reject();
+          }
           resolve();
         };
         xhr.send(

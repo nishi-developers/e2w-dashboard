@@ -2,35 +2,35 @@
   <v-container>
     <v-card class="mx-auto pa-6 mt-8" max-width="400">
       <div class="text-center my-8">
-        <p class="display-2 mb-0">サイコ予約</p>
+        <p class="display-2 mb-0">サイコの予約</p>
         <p class="subtitle">管理者用ダッシュボード</p>
       </div>
-      <v-form>
+      <span v-if="failed" class="red--text">
+        ログインに失敗しました。
+        <br />入力内容に誤りがあります。
+        <br />
+        <br />
+      </span>
+      <v-form ref="form" v-model="valid" lazy-validation>
         <v-text-field
           v-model="value.collectionName"
           :rules="[rules.required]"
           label="CollectionName"
           required
         ></v-text-field>
-        <v-text-field
-          v-model="value.token"
-          :rules="[rules.required]"
-          type="Password"
-          label="Token"
-        ></v-text-field>
+        <v-text-field v-model="value.token" :rules="[rules.required]" type="Password" label="Token"></v-text-field>
         <br />
         <v-btn
           block
           @click="
-            $emit('done');
-            loading = true;
+            if($refs.form.validate())$emit('done');
           "
           height="50px"
           color="primary"
-          dark
+          :dark="valid"
           :loading="loading"
-          >ログイン</v-btn
-        >
+          :disabled="!valid"
+        >ログイン</v-btn>
       </v-form>
     </v-card>
   </v-container>
@@ -39,14 +39,16 @@
 <script>
 export default {
   props: {
-    value: Object
+    value: Object,
+    failed: Boolean,
+    loading: Boolean
   },
   data() {
     return {
       rules: {
-        required: value => !!value || "Required."
+        required: value => !!value || "入力してください"
       },
-      loading: false
+      valid: true
     };
   }
 };
