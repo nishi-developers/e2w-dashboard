@@ -8,13 +8,13 @@
         <v-list>
           <v-list-item-group v-model="selectedPerformanceNum" mandatory>
             <v-list-item
-              v-for="(item, i) in Object.keys(info.performanceList)"
+              v-for="(item, i) in Object.keys(performanceList)"
               :key="i"
               @click="step = 2"
             >
               <v-list-item-content>
                 <v-list-item-title v-text="item"></v-list-item-title>
-                <v-list-item-subtitle v-text="info.performanceList[item].date"></v-list-item-subtitle>
+                <v-list-item-subtitle v-text="performanceList[item].date"></v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -27,7 +27,7 @@
             <v-icon small>mdi-less-than</v-icon>公演一覧
           </v-btn>
           <v-card-title>{{ selectedPerformance }}</v-card-title>
-          <v-card-subtitle>{{ info.performanceList[selectedPerformance].date }}</v-card-subtitle>
+          <v-card-subtitle>{{ performanceList[selectedPerformance].date }}</v-card-subtitle>
           <v-row class="px-4">
             <v-col cols="12" sm="5" md="5" class="py-0">
               <v-text-field
@@ -51,22 +51,22 @@
           <seat-table
             class="mx-auto my-10"
             :style="{cursor:'default'}"
-            :formation="JSON.parse(info.performanceList[selectedPerformance].formation)"
-            :seats="info.performanceList[selectedPerformance].seats"
+            :formation="JSON.parse(performanceList[selectedPerformance].formation)"
+            :seats="performanceList[selectedPerformance].seats"
           />
         </v-card>
       </v-window-item>
     </v-window>
     <!--<v-tabs vertical>
-      <v-tab v-for="item in Object.keys(info.performanceList)" :key="item" link>
+      <v-tab v-for="item in Object.keys(performanceList)" :key="item" link>
         {{item}}
       </v-tab>
-      <v-tab v-if="Object.keys(info.performanceList).length > 0">
+      <v-tab v-if="Object.keys(performanceList).length > 0">
         <i>
           <b>＋ 追加...</b>
         </i>
       </v-tab>
-      <v-tab-item v-for="item in Object.keys(info.performanceList)" :key="item">
+      <v-tab-item v-for="item in Object.keys(performanceList)" :key="item">
         <v-card flat class="pa-3">
           <v-row>
             <v-col cols="12" sm="5" md="5" class="py-0">
@@ -91,12 +91,12 @@
           <seat-table
             class="mx-auto mt-10"
             :style="{cursor:'default'}"
-            :formation="info.formations[item]"
-            :seats="info.seats[item]"
+            :formation="formations[item]"
+            :seats="seats[item]"
           />
         </v-card>
       </v-tab-item>
-      <v-tab-item v-if="Object.keys(info.performanceList).length > 0">
+      <v-tab-item v-if="Object.keys(performanceList).length > 0">
         <v-container>
           <seat-table
             class="mx-auto mt-10"
@@ -161,14 +161,15 @@ export default {
     SeatTable
   },
   props: {
-    info: Object
+    performanceList: Object
   },
   data() {
     return {
       rules: {
         required: value => !!value || "Required."
       },
-      seatNumbers: [],
+      //todo seatNumbersを使用するという仕組みを撤廃
+      seatNumbers: {},
       userIds: [],
       menu: false,
       editing: {
@@ -236,9 +237,7 @@ export default {
   computed: {
     //アロー関数はthisが異なるため使えない
     selectedPerformance: function() {
-      return Object.keys(this.info.performanceList)[
-        this.selectedPerformanceNum
-      ];
+      return Object.keys(this.performanceList)[this.selectedPerformanceNum];
     }
   }
 };

@@ -12,7 +12,7 @@
         <v-content>
           <v-container fluid>
             <main-card
-              :info="info"
+              :performanceList="performanceList"
               @addPerformance="
             (performanceName, date, formation) => {
               this.makePerformance(performanceName, date, formation);
@@ -21,9 +21,7 @@
           "
               @setReservation="
             (item, seatNumber, userId) => {
-              this.info.seatNumber = seatNumber;
-              this.info.userId = userId;
-              if (!setReservation(item)) update();
+              if (!setReservation(item, seatNumber, userId)) update();
             }
           "
             ></main-card>
@@ -55,14 +53,7 @@ export default {
         collectionName: "",
         token: ""
       },
-      info: {
-        formations: [],
-        seats: [],
-        seatNumber: 0,
-        userId: "",
-        formation_str: "",
-        performanceList: []
-      },
+      performanceList: [],
       valid: false,
       collectionNameRules: [v => !!v || "CollectionName is required"],
       tokenRules: [v => !!v || "Token is required"],
@@ -81,14 +72,8 @@ export default {
       this.loading = true;
       this.getPerformanceList()
         .then(() => {
-          let promises = [];
-          /*for (let performanceName in this.info.performanceList) {
-            promises.push(this.getPerformance(performanceName));
-          }*/
-          Promise.all(promises).then(() => {
-            this.logined = true;
-            this.loading = false;
-          });
+          this.logined = true;
+          this.loading = false;
         })
         .catch(() => {
           this.failed = true;
@@ -100,30 +85,6 @@ export default {
       this.loginData.token = "";
       this.failed = false;
       this.logined = false;
-    },
-    getPerformance(performanceName) {
-      return new Promise(resolve => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "getPerformance");
-        xhr.onload = () => {
-          console.log(xhr.response);
-          const data = JSON.parse(xhr.response);
-          this.info.formations[performanceName] =
-            typeof data.formation === "undefined" || data.formation === ""
-              ? []
-              : JSON.parse(data.formation);
-          this.info.seats[performanceName] = data.seats;
-          this.info.seats.splice(); //This code is necessary to reflect changes
-          resolve();
-        };
-        xhr.send(
-          JSON.stringify({
-            collectionName: this.loginData.collectionName,
-            token: this.loginData.token,
-            performanceName: performanceName
-          })
-        );
-      });
     },
     makePerformance(performanceName, date, formation) {
       if (this.performanceName === "") {
@@ -145,9 +106,9 @@ export default {
         );
       }
     },
-    setReservation(performanceName) {
+    setReservation(performanceName, id, seatNumber) {
       let flag = false;
-      if (this.info.userId === "") {
+      if (id === "") {
         alert("UserIdを入力してください");
         flag = true;
       }
@@ -162,8 +123,8 @@ export default {
             collectionName: this.loginData.collectionName,
             token: this.loginData.token,
             performanceName: performanceName,
-            seatNumber: this.info.seatNumber,
-            seat: { type: "line", id: this.info.userId }
+            seatNumber,
+            seat: { type: "line", id }
           })
         );
       }
@@ -176,7 +137,7 @@ export default {
         xhr.onload = () => {
           console.log(xhr.response);
           try {
-            this.info.performanceList = JSON.parse(xhr.response);
+            this.performanceList = JSON.parse(xhr.response);
           } catch (e) {
             reject();
           }
