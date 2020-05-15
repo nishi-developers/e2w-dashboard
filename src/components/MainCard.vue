@@ -3,9 +3,62 @@
     <v-toolbar flat color="primary" dark>
       <v-toolbar-title>団体名</v-toolbar-title>
     </v-toolbar>
-    <v-tabs vertical>
+    <v-window v-model="step" touchless>
+      <v-window-item :value="1">
+        <v-list>
+          <v-list-item-group v-model="selectedPerformanceNum" mandatory>
+            <v-list-item
+              v-for="(item, i) in Object.keys(info.performanceList)"
+              :key="i"
+              @click="step = 2"
+            >
+              <v-list-item-content>
+                <v-list-item-title v-text="item"></v-list-item-title>
+                <v-list-item-subtitle v-text="info.performanceList[item].date"></v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-window-item>
+
+      <v-window-item :value="2">
+        <v-card flat class="pa-3" v-if="selectedPerformanceNum >= 0">
+          <v-btn text class="px-0" color="secondary" @click="step = 1;" small>
+            <v-icon small>mdi-less-than</v-icon>公演一覧
+          </v-btn>
+          <v-card-title>{{ selectedPerformance }}</v-card-title>
+          <v-card-subtitle>{{ info.performanceList[selectedPerformance].date }}</v-card-subtitle>
+          <v-row class="px-4">
+            <v-col cols="12" sm="5" md="5" class="py-0">
+              <v-text-field
+                v-model.number="seatNumbers[selectedPerformance]"
+                label="座席番号"
+                type="number"
+                min="0"
+                hide-details="auto"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="5" md="5" class="py-0" hide-details="auto">
+              <v-text-field v-model="userIds[selectedPerformance]" label="ユーザーID"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="2" md="2" class="align-end" hide-details="auto">
+              <v-btn
+                block
+                @click="$emit('setReservation', selectedPerformance, seatNumbers[selectedPerformance], userIds[selectedPerformance])"
+              >予約</v-btn>
+            </v-col>
+          </v-row>
+          <seat-table
+            class="mx-auto my-10"
+            :style="{cursor:'default'}"
+            :formation="JSON.parse(info.performanceList[selectedPerformance].formation)"
+            :seats="info.performanceList[selectedPerformance].seats"
+          />
+        </v-card>
+      </v-window-item>
+    </v-window>
+    <!--<v-tabs vertical>
       <v-tab v-for="item in Object.keys(info.performanceList)" :key="item" link>
-        <!--<v-icon left>mdi-account</v-icon>!-->
         {{item}}
       </v-tab>
       <v-tab v-if="Object.keys(info.performanceList).length > 0">
@@ -97,7 +150,7 @@
           </v-row>
         </v-container>
       </v-tab-item>
-    </v-tabs>
+    </v-tabs>-->
   </v-card>
 </template>
 
@@ -124,7 +177,9 @@ export default {
         width: 0,
         height: 0,
         date: null
-      }
+      },
+      step: 1,
+      selectedPerformanceNum: -1
     };
   },
   methods: {
@@ -176,6 +231,14 @@ export default {
       } else {
         this.editing.formation = this.editing.formation.slice(0, newVal);
       }
+    }
+  },
+  computed: {
+    //アロー関数はthisが異なるため使えない
+    selectedPerformance: function() {
+      return Object.keys(this.info.performanceList)[
+        this.selectedPerformanceNum
+      ];
     }
   }
 };

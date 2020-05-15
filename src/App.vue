@@ -82,9 +82,9 @@ export default {
       this.getPerformanceList()
         .then(() => {
           let promises = [];
-          for (let performanceName in this.info.performanceList) {
+          /*for (let performanceName in this.info.performanceList) {
             promises.push(this.getPerformance(performanceName));
-          }
+          }*/
           Promise.all(promises).then(() => {
             this.logined = true;
             this.loading = false;
