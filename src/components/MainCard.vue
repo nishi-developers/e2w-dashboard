@@ -1,8 +1,9 @@
 <template>
-  <v-card class="mx-auto" max-width="900">
+  <v-card class="mx-auto" max-width="700">
     <v-toolbar flat color="primary" dark>
       <v-toolbar-title>団体名</v-toolbar-title>
     </v-toolbar>
+
     <v-window v-model="step" touchless>
       <v-window-item :value="1">
         <v-list>
@@ -18,12 +19,84 @@
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
+
+          <v-list-item>
+            <v-dialog v-model="dialog" width="500">
+              <template v-slot:activator="{ on }">
+                <v-btn v-on="on" outlined block color="secondary" @click="initEditForm()">
+                  <v-icon>mdi-plus</v-icon>公演を追加
+                </v-btn>
+              </template>
+
+              <v-card>
+                <v-card-title class="pl-7 headline grey lighten-2" primary-title>公演を追加</v-card-title>
+                <v-container>
+                  <v-row class="mx-1">
+                    <v-col cols="12" md="3" class="py-0">
+                      <v-text-field
+                        v-model="editing.performanceName"
+                        :rules="[rules.required]"
+                        label="公演名"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="3" class="py-0">
+                      <v-menu
+                        ref="menu"
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        :return-value.sync="editing.date"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field v-model="editing.date" label="日付" readonly v-on="on"></v-text-field>
+                        </template>
+                        <v-date-picker v-model="editing.date" no-title scrollable>
+                          <div class="flex-grow-1"></div>
+                          <v-btn text color="primary" @click="menu=false">キャンセル</v-btn>
+                          <v-btn text color="primary" @click="$refs.menu.save(editing.date)">OK</v-btn>
+                        </v-date-picker>
+                      </v-menu>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6" class="py-0">
+                      <v-row>
+                        <v-col cols="12" sm="6" md="6" class="py-0">
+                          <v-text-field v-model.number="editing.width" label="横" type="number"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="6" class="py-0">
+                          <v-text-field v-model.number="editing.height" label="縦" type="number"></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+
+                  <seat-table
+                    class="mx-auto my-4"
+                    @cellclicked="toggle"
+                    :formation="editing.formation"
+                    :seats="new Object()"
+                    :style="{cursor:'pointer'}"
+                  />
+
+                  <v-card-actions class="d-flex justify-end pr-4">
+                    <v-btn text @click="dialog = false">キャンセル</v-btn>
+                    <v-btn
+                      @click="$emit('addPerformance', editing.performanceName, editing.date, editing.formation);dialog = false;"
+                      color="primary"
+                    >完了</v-btn>
+                  </v-card-actions>
+                </v-container>
+              </v-card>
+            </v-dialog>
+          </v-list-item>
         </v-list>
       </v-window-item>
 
       <v-window-item :value="2">
         <v-card flat class="pa-3" v-if="selectedPerformanceNum >= 0">
-          <v-btn text class="px-0" color="secondary" @click="step = 1;" small>
+          <v-btn text class="px-0" color="secondary" @click="step = 1" small>
             <v-icon small>mdi-less-than</v-icon>公演一覧
           </v-btn>
           <v-card-title>{{ selectedPerformance }}</v-card-title>
@@ -180,7 +253,8 @@ export default {
         date: null
       },
       step: 1,
-      selectedPerformanceNum: -1
+      selectedPerformanceNum: -1,
+      dialog: false
     };
   },
   methods: {
