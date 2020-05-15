@@ -1,5 +1,8 @@
 <template>
-  <v-card width="90%" class="mx-auto">
+  <v-card class="mx-auto" max-width="900">
+    <v-toolbar flat color="primary" dark>
+      <v-toolbar-title>団体名</v-toolbar-title>
+    </v-toolbar>
     <v-tabs vertical>
       <v-tab v-for="item in Object.keys(info.performanceList)" :key="item" link>
         <!--<v-icon left>mdi-account</v-icon>!-->
@@ -11,30 +14,33 @@
         </i>
       </v-tab>
       <v-tab-item v-for="item in Object.keys(info.performanceList)" :key="item">
-        <v-card flat>
+        <v-card flat class="pa-3">
+          <v-row>
+            <v-col cols="12" sm="5" md="5" class="py-0">
+              <v-text-field
+                v-model.number="seatNumbers[item]"
+                label="座席番号"
+                type="number"
+                min="0"
+                hide-details="auto"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="5" md="5" class="py-0" hide-details="auto">
+              <v-text-field v-model="userIds[item]" label="ユーザーID"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="2" md="2" class="align-end" hide-details="auto">
+              <v-btn
+                block
+                @click="$emit('setReservation', item, seatNumbers[item], userIds[item])"
+              >予約</v-btn>
+            </v-col>
+          </v-row>
           <seat-table
             class="mx-auto mt-10"
             :style="{cursor:'default'}"
             :formation="info.formations[item]"
             :seats="info.seats[item]"
           />
-          <v-container width="90%" class="mx-auto">
-            <v-row class="mt-5">
-              <v-col cols="12" sm="5" md="5">
-                <v-text-field v-model.number="seatNumbers[item]" label="座席番号" type="number" min="0"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="5" md="5">
-                <v-text-field v-model="userIds[item]" label="ユーザーID"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="2" md="2">
-                <v-btn
-                  block
-                  @click="$emit('setReservation', item, seatNumbers[item], userIds[item])"
-                  height="50px"
-                >予約</v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
         </v-card>
       </v-tab-item>
       <v-tab-item v-if="Object.keys(info.performanceList).length > 0">

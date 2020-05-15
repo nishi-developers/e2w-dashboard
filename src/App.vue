@@ -2,7 +2,7 @@
   <div id="app">
     <v-app>
       <div v-if="logined">
-        <v-app-bar app color="primary" dark>
+        <v-app-bar app color="secondary" dark>
           <v-toolbar-title class="ml-2">サイコの予約</v-toolbar-title>
 
           <v-spacer></v-spacer>

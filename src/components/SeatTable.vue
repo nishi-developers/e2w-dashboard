@@ -1,12 +1,13 @@
 <template>
   <table @mouseleave="setActive(-1)">
-    <tr v-for="(row, i) in formation">
+    <tr v-for="(row, i) in formation" :key="i">
       <td
         class="cell"
         v-for="(cell, j) in row"
         :style="{ backgroundColor: backgroundColor(cell, i * row.length + j) , color: textColor(cell)}"
         @mouseover="setActive(i * row.length + j)"
         @click="$emit('cellclicked', i, j)"
+        :key="j"
       >
         {{ i * row.length + j}}
         <div class="fukidashi" v-if="isActive(i * row.length + j)">{{ text(i * row.length + j) }}</div>
