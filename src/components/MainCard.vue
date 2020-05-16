@@ -63,10 +63,20 @@
                     <v-col cols="12" sm="6" md="6" class="py-0">
                       <v-row>
                         <v-col cols="12" sm="6" md="6" class="py-0">
-                          <v-text-field v-model.number="editing.width" label="横" type="number"></v-text-field>
+                          <v-text-field
+                            v-model.number="editing.width"
+                            label="横"
+                            type="number"
+                            min="1"
+                          ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="6" class="py-0">
-                          <v-text-field v-model.number="editing.height" label="縦" type="number"></v-text-field>
+                          <v-text-field
+                            v-model.number="editing.height"
+                            label="縦"
+                            type="number"
+                            min="1"
+                          ></v-text-field>
                         </v-col>
                       </v-row>
                     </v-col>
@@ -123,7 +133,6 @@
           </v-row>
           <seat-table
             class="mx-auto my-10"
-            :style="{cursor:'default'}"
             :formation="JSON.parse(performanceList[selectedPerformance].formation)"
             :seats="performanceList[selectedPerformance].seats"
           />
