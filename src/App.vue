@@ -87,24 +87,20 @@ export default {
       this.logined = false;
     },
     makePerformance(performanceName, date, formation) {
-      if (this.performanceName === "") {
-        alert("PerformanceNameを入力してください");
-      } else {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "makePerformance");
-        xhr.onload = () => {
-          console.log(xhr.response);
-        };
-        xhr.send(
-          JSON.stringify({
-            collectionName: this.loginData.collectionName,
-            token: this.loginData.token,
-            performanceName: performanceName,
-            formation: JSON.stringify(formation),
-            date: date
-          })
-        );
-      }
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", host + "makePerformance");
+      xhr.onload = () => {
+        console.log(xhr.response);
+      };
+      xhr.send(
+        JSON.stringify({
+          collectionName: this.loginData.collectionName,
+          token: this.loginData.token,
+          performanceName: performanceName,
+          formation: JSON.stringify(formation),
+          date: date
+        })
+      );
     },
     setReservation(performanceName, id, seatNumber) {
       let flag = false;

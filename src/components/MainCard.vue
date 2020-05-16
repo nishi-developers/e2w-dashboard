@@ -31,56 +31,69 @@
               <v-card>
                 <v-card-title class="pl-7 headline grey lighten-2" primary-title>公演を追加</v-card-title>
                 <v-container>
-                  <v-row class="mx-1">
-                    <v-col cols="12" md="3" class="py-0">
-                      <v-text-field
-                        v-model="editing.performanceName"
-                        :rules="[rules.required]"
-                        label="公演名"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="3" class="py-0">
-                      <v-menu
-                        ref="menu"
-                        v-model="menu"
-                        :close-on-content-click="false"
-                        :return-value.sync="editing.date"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on }">
-                          <v-text-field v-model="editing.date" label="日付" readonly v-on="on"></v-text-field>
-                        </template>
-                        <v-date-picker v-model="editing.date" no-title scrollable>
-                          <div class="flex-grow-1"></div>
-                          <v-btn text color="primary" @click="menu=false">キャンセル</v-btn>
-                          <v-btn text color="primary" @click="$refs.menu.save(editing.date)">OK</v-btn>
-                        </v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="6" class="py-0">
-                      <v-row>
-                        <v-col cols="12" sm="6" md="6" class="py-0">
-                          <v-text-field
-                            v-model.number="editing.width"
-                            label="横"
-                            type="number"
-                            min="1"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="6" class="py-0">
-                          <v-text-field
-                            v-model.number="editing.height"
-                            label="縦"
-                            type="number"
-                            min="1"
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                  </v-row>
+                  <v-form ref="addPerformanceForm" v-model="addPerformanceValid" lazy-validation>
+                    <v-row class="mx-1">
+                      <v-col cols="12" md="3" class="py-0">
+                        <v-text-field
+                          v-model="editing.performanceName"
+                          label="公演名"
+                          :rules="[rules.required]"
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" md="3" class="py-0">
+                        <v-menu
+                          ref="menu"
+                          v-model="menu"
+                          :close-on-content-click="false"
+                          :return-value.sync="editing.date"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="290px"
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              v-model="editing.date"
+                              label="日付"
+                              readonly
+                              v-on="on"
+                              :rules="[rules.required]"
+                              required
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker v-model="editing.date" no-title scrollable>
+                            <div class="flex-grow-1"></div>
+                            <v-btn text color="primary" @click="menu=false">キャンセル</v-btn>
+                            <v-btn text color="primary" @click="$refs.menu.save(editing.date)">OK</v-btn>
+                          </v-date-picker>
+                        </v-menu>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="6" class="py-0">
+                        <v-row>
+                          <v-col cols="12" sm="6" md="6" class="py-0">
+                            <v-text-field
+                              v-model.number="editing.width"
+                              label="横"
+                              type="number"
+                              min="1"
+                              :rules="[rules.required]"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="6" class="py-0">
+                            <v-text-field
+                              v-model.number="editing.height"
+                              label="縦"
+                              type="number"
+                              min="1"
+                              :rules="[rules.required]"
+                              required
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-col>
+                    </v-row>
+                  </v-form>
 
                   <seat-table
                     class="mx-auto my-4"
@@ -92,7 +105,9 @@
                   <v-card-actions class="d-flex justify-end pr-4">
                     <v-btn text @click="addingDialog = false">キャンセル</v-btn>
                     <v-btn
-                      @click="$emit('addPerformance', editing.performanceName, editing.date, editing.formation);addingDialog = false;"
+                      @click="
+                      if($refs.addPerformanceForm.validate()){$emit('addPerformance', editing.performanceName, editing.date, editing.formation);addingDialog = false;}
+                      "
                       color="primary"
                     >完了</v-btn>
                   </v-card-actions>
@@ -123,13 +138,15 @@
                 座席番号&nbsp;
                 <span class="display-1">{{selectedSeat}}</span>
               </v-card-text>
-              <v-form class="px-6">
-                <v-text-field v-model="userId" label="ユーザーID"></v-text-field>
+              <v-form class="px-6" ref="reservationForm" v-model="reservationValid" lazy-validation>
+                <v-text-field v-model="userId" label="ユーザーID" :rules="[rules.required]" required></v-text-field>
               </v-form>
               <v-card-actions class="d-flex justify-end">
                 <v-btn text @click="reservationDialog = false">キャンセル</v-btn>
                 <v-btn
-                  @click="$emit('setReservation', selectedPerformance, userId, selectedSeat);reservationDialog = false;"
+                  @click="
+                  if($refs.reservationForm.validate()){$emit('setReservation', selectedPerformance, userId, selectedSeat);reservationDialog = false;}
+                  "
                   color="primary"
                 >完了</v-btn>
               </v-card-actions>
@@ -247,11 +264,8 @@ export default {
   data() {
     return {
       rules: {
-        required: value => !!value || "Required."
+        required: value => !!value || "入力してください"
       },
-      //todo seatNumbersを使用するという仕組みを撤廃
-      seatNumbers: {},
-      userIds: [],
       menu: false,
       editing: {
         performanceName: "",
@@ -265,7 +279,9 @@ export default {
       addingDialog: false,
       reservationDialog: false,
       selectedSeat: -1,
-      userId: ""
+      userId: "",
+      addPerformanceValid: true,
+      reservationValid: true
     };
   },
   methods: {
