@@ -14,9 +14,9 @@
               tile
               flat
               class="text-center"
-              :color="backgroundColor(cell, i * row.length + j)"
+              :color="backgroundColor(cell, i * row.length + j + 1)"
               dark
-              @click="$emit('cellclicked', i, j)"
+              @click.stop="$emit('cellclicked', i, j)"
             >{{ i * row.length + j + 1}}</v-card>
           </v-col>
         </v-row>

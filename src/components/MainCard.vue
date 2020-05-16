@@ -21,7 +21,7 @@
           </v-list-item-group>
 
           <v-list-item>
-            <v-dialog v-model="dialog" width="500">
+            <v-dialog v-model="addingDialog" width="500">
               <template v-slot:activator="{ on }">
                 <v-btn v-on="on" outlined block color="secondary" @click="initEditForm()">
                   <v-icon>mdi-plus</v-icon>公演を追加
@@ -87,13 +87,12 @@
                     @cellclicked="toggle"
                     :formation="editing.formation"
                     :seats="new Object()"
-                    :style="{cursor:'pointer'}"
                   />
 
                   <v-card-actions class="d-flex justify-end pr-4">
-                    <v-btn text @click="dialog = false">キャンセル</v-btn>
+                    <v-btn text @click="addingDialog = false">キャンセル</v-btn>
                     <v-btn
-                      @click="$emit('addPerformance', editing.performanceName, editing.date, editing.formation);dialog = false;"
+                      @click="$emit('addPerformance', editing.performanceName, editing.date, editing.formation);addingDialog = false;"
                       color="primary"
                     >完了</v-btn>
                   </v-card-actions>
@@ -111,31 +110,31 @@
           </v-btn>
           <v-card-title>{{ selectedPerformance }}</v-card-title>
           <v-card-subtitle>{{ performanceList[selectedPerformance].date }}</v-card-subtitle>
-          <v-row class="px-4">
-            <v-col cols="12" sm="5" md="5" class="py-0">
-              <v-text-field
-                v-model.number="seatNumbers[selectedPerformance]"
-                label="座席番号"
-                type="number"
-                min="0"
-                hide-details="auto"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="5" md="5" class="py-0" hide-details="auto">
-              <v-text-field v-model="userIds[selectedPerformance]" label="ユーザーID"></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="2" md="2" class="align-end" hide-details="auto">
-              <v-btn
-                block
-                @click="$emit('setReservation', selectedPerformance, seatNumbers[selectedPerformance], userIds[selectedPerformance])"
-              >予約</v-btn>
-            </v-col>
-          </v-row>
           <seat-table
-            class="mx-auto my-10"
+            class="mx-auto mb-10 mt-5"
             :formation="JSON.parse(performanceList[selectedPerformance].formation)"
             :seats="performanceList[selectedPerformance].seats"
+            @cellclicked="(i, j) => {selectedSeat =  i * JSON.parse(performanceList[selectedPerformance].formation)[0].length + j + 1;reservationDialog = true;}"
           />
+          <v-dialog v-model="reservationDialog" max-width="500">
+            <v-card>
+              <v-card-title class="headline grey lighten-2" primary-title>座席を予約</v-card-title>
+              <v-card-text class="title black--text pt-8">
+                座席番号&nbsp;
+                <span class="display-1">{{selectedSeat}}</span>
+              </v-card-text>
+              <v-form class="px-6">
+                <v-text-field v-model="userId" label="ユーザーID"></v-text-field>
+              </v-form>
+              <v-card-actions class="d-flex justify-end">
+                <v-btn text @click="reservationDialog = false">キャンセル</v-btn>
+                <v-btn
+                  @click="$emit('setReservation', selectedPerformance, userId, selectedSeat);reservationDialog = false;"
+                  color="primary"
+                >完了</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-card>
       </v-window-item>
     </v-window>
@@ -263,7 +262,10 @@ export default {
       },
       step: 1,
       selectedPerformanceNum: -1,
-      dialog: false
+      addingDialog: false,
+      reservationDialog: false,
+      selectedSeat: -1,
+      userId: ""
     };
   },
   methods: {
