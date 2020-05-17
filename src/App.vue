@@ -85,7 +85,12 @@ export default {
     makePerformance(performanceName, date, formation) {
       this.loading = true;
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", this.loginData.host + "makePerformance");
+      xhr.open(
+        "POST",
+        "https://asia-northeast1-" +
+          this.loginData.host +
+          ".cloudfunctions.net/makePerformance"
+      );
       xhr.onload = () => {
         console.log(xhr.response);
         if (xhr.response === "") {
@@ -108,7 +113,12 @@ export default {
     setReservation(performanceName, id, seatNumber) {
       this.loading = true;
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", this.loginData.host + "setReservation2");
+      xhr.open(
+        "POST",
+        "https://asia-northeast1-" +
+          this.loginData.host +
+          ".cloudfunctions.net/setReservation2"
+      );
       xhr.onload = () => {
         console.log(xhr.response);
         if (xhr.response === "success") {
@@ -131,7 +141,12 @@ export default {
     getPerformanceList() {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", this.loginData.host + "getPerformanceList");
+        xhr.open(
+          "POST",
+          "https://asia-northeast1-" +
+            this.loginData.host +
+            ".cloudfunctions.net/getPerformanceList"
+        );
         xhr.onload = () => {
           console.log(xhr.response);
           try {
