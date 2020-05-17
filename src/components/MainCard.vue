@@ -130,7 +130,7 @@
             class="mx-auto mb-10 mt-5"
             :formation="JSON.parse(performanceList[selectedPerformance].formation)"
             :seats="performanceList[selectedPerformance].seats"
-            @cellclicked="(i, j) => {selectedSeat =  i * JSON.parse(performanceList[selectedPerformance].formation)[0].length + j + 1;reservationDialog = true;}"
+            @cellclicked="(i, j) => {userId = ''; reservationValid = true; selectedSeat =  i * JSON.parse(performanceList[selectedPerformance].formation)[0].length + j + 1; reservationDialog = true;}"
           />
           <v-dialog v-model="reservationDialog" max-width="500">
             <v-card>
@@ -161,9 +161,9 @@
     <v-dialog v-model="failed" max-width="500">
       <v-card>
         <v-card-title class="headline grey lighten-2" primary-title>エラー</v-card-title>
-        <v-card-text>{{ failedMessage }}</v-card-text>
+        <v-card-text class="pt-8">{{ failedMessage }}</v-card-text>
         <v-card-actions class="d-flex justify-end">
-          <v-btn @click="failed = false">閉じる</v-btn>
+          <v-btn @click="$emit('failedDone')">閉じる</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

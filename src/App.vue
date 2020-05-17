@@ -16,15 +16,15 @@
               :loading="loading"
               :failed="failed"
               :failedMessage="failedMessage"
+              @failedDone="failed = false"
               @addPerformance="
             (performanceName, date, formation) => {
-              this.makePerformance(performanceName, date, formation);
-              this.update();
+              makePerformance(performanceName, date, formation);
             }
           "
               @setReservation="
             (item, seatNumber, userId) => {
-              if (!setReservation(item, seatNumber, userId)) update();
+              setReservation(item, seatNumber, userId);
             }
           "
             ></main-card>
@@ -93,7 +93,7 @@ export default {
       );
       xhr.onload = () => {
         console.log(xhr.response);
-        if (xhr.response === "") {
+        if (xhr.response === "success") {
           this.update();
         } else {
           this.failedMessage = xhr.response;
