@@ -7,11 +7,11 @@
     <v-window v-model="step" touchless>
       <v-window-item :value="1">
         <v-list>
-          <v-list-item-group v-model="selectedPerformanceNum" mandatory>
+          <v-list-item-group v-model="selectedPerformanceNum" :mandatory="mandatory">
             <v-list-item
               v-for="(item, i) in Object.keys(performanceList)"
               :key="i"
-              @click="step = 2"
+              @click="mandatory = true; step = 2;"
             >
               <v-list-item-content>
                 <v-list-item-title v-text="item"></v-list-item-title>
@@ -103,12 +103,13 @@
                   />
 
                   <v-card-actions class="d-flex justify-end pr-4">
-                    <v-btn text @click="addingDialog = false">キャンセル</v-btn>
+                    <v-btn text @click="addingDialog = false" :disabled="loading">キャンセル</v-btn>
                     <v-btn
                       @click="
-                      if($refs.addPerformanceForm.validate()){$emit('addPerformance', editing.performanceName, editing.date, editing.formation);addingDialog = false;}
+                      if($refs.addPerformanceForm.validate()){$emit('addPerformance', editing.performanceName, editing.date, editing.formation);}
                       "
                       color="primary"
+                      :loading="loading"
                     >完了</v-btn>
                   </v-card-actions>
                 </v-container>
@@ -142,12 +143,13 @@
                 <v-text-field v-model="userId" label="ユーザーID" :rules="[rules.required]" required></v-text-field>
               </v-form>
               <v-card-actions class="d-flex justify-end">
-                <v-btn text @click="reservationDialog = false">キャンセル</v-btn>
+                <v-btn text @click="reservationDialog = false" :disabled="loading">キャンセル</v-btn>
                 <v-btn
                   @click="
-                  if($refs.reservationForm.validate()){$emit('setReservation', selectedPerformance, userId, selectedSeat);reservationDialog = false;}
+                  if($refs.reservationForm.validate()){$emit('setReservation', selectedPerformance, userId, selectedSeat);}
                   "
                   color="primary"
+                  :loading="loading"
                 >完了</v-btn>
               </v-card-actions>
             </v-card>
@@ -155,6 +157,16 @@
         </v-card>
       </v-window-item>
     </v-window>
+
+    <v-dialog v-model="failed" max-width="500">
+      <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>エラー</v-card-title>
+        <v-card-text>{{ failedMessage }}</v-card-text>
+        <v-card-actions class="d-flex justify-end">
+          <v-btn @click="failed = false">閉じる</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <!--<v-tabs vertical>
       <v-tab v-for="item in Object.keys(performanceList)" :key="item" link>
         {{item}}
@@ -259,7 +271,10 @@ export default {
     SeatTable
   },
   props: {
-    performanceList: Object
+    performanceList: Object,
+    loading: Boolean,
+    failed: Boolean,
+    failedMessage: String
   },
   data() {
     return {
@@ -281,7 +296,8 @@ export default {
       selectedSeat: -1,
       userId: "",
       addPerformanceValid: true,
-      reservationValid: true
+      reservationValid: true,
+      mandatory: false
     };
   },
   methods: {
@@ -333,6 +349,9 @@ export default {
       } else {
         this.editing.formation = this.editing.formation.slice(0, newVal);
       }
+    },
+    loading: function() {
+      this.addingDialog = this.reservationDialog = false;
     }
   },
   computed: {

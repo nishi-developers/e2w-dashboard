@@ -13,6 +13,9 @@
           <v-container fluid>
             <main-card
               :performanceList="performanceList"
+              :loading="loading"
+              :failed="failed"
+              :failedMessage="failedMessage"
               @addPerformance="
             (performanceName, date, formation) => {
               this.makePerformance(performanceName, date, formation);
@@ -56,6 +59,7 @@ export default {
       performanceList: [],
       logined: false,
       failed: false,
+      failedMessage: "",
       loading: false
     };
   },
@@ -79,10 +83,17 @@ export default {
       this.logined = false;
     },
     makePerformance(performanceName, date, formation) {
+      this.loading = true;
       const xhr = new XMLHttpRequest();
       xhr.open("POST", this.loginData.host + "makePerformance");
       xhr.onload = () => {
         console.log(xhr.response);
+        if (xhr.response === "") {
+          this.update();
+        } else {
+          this.failedMessage = xhr.response;
+          this.failed = true;
+        }
       };
       xhr.send(
         JSON.stringify({
@@ -95,28 +106,27 @@ export default {
       );
     },
     setReservation(performanceName, id, seatNumber) {
-      let flag = false;
-      if (id === "") {
-        alert("UserIdを入力してください");
-        flag = true;
-      }
-      if (!flag) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", this.loginData.host + "setReservation2");
-        xhr.onload = () => {
-          console.log(xhr.response);
-        };
-        xhr.send(
-          JSON.stringify({
-            collectionName: this.collectionName,
-            token: this.loginData.token,
-            performanceName: performanceName,
-            seatNumber,
-            seat: { type: "line", id }
-          })
-        );
-      }
-      return flag;
+      this.loading = true;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", this.loginData.host + "setReservation2");
+      xhr.onload = () => {
+        console.log(xhr.response);
+        if (xhr.response === "success") {
+          this.update();
+        } else {
+          this.failedMessage = xhr.response;
+          this.failed = true;
+        }
+      };
+      xhr.send(
+        JSON.stringify({
+          collectionName: this.collectionName,
+          token: this.loginData.token,
+          performanceName: performanceName,
+          seatNumber,
+          seat: { type: "line", id }
+        })
+      );
     },
     getPerformanceList() {
       return new Promise((resolve, reject) => {
