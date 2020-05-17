@@ -34,7 +34,6 @@
 </template>
 
 <script>
-const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
@@ -50,18 +49,11 @@ export default {
   data() {
     return {
       loginData: {
-        collectionName: "",
+        host: "",
         token: ""
       },
+      collectionName: "psychopath",
       performanceList: [],
-      valid: false,
-      collectionNameRules: [v => !!v || "CollectionName is required"],
-      tokenRules: [v => !!v || "Token is required"],
-      password: "Password",
-      rules: {
-        required: value => !!value || "Required."
-      },
-      right: null,
       logined: false,
       failed: false,
       loading: false
@@ -81,20 +73,20 @@ export default {
         });
     },
     logout() {
-      this.loginData.collectionName = "";
+      this.loginData.host = "";
       this.loginData.token = "";
       this.failed = false;
       this.logined = false;
     },
     makePerformance(performanceName, date, formation) {
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "makePerformance");
+      xhr.open("POST", this.loginData.host + "makePerformance");
       xhr.onload = () => {
         console.log(xhr.response);
       };
       xhr.send(
         JSON.stringify({
-          collectionName: this.loginData.collectionName,
+          collectionName: this.collectionName,
           token: this.loginData.token,
           performanceName: performanceName,
           formation: JSON.stringify(formation),
@@ -110,13 +102,13 @@ export default {
       }
       if (!flag) {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "setReservation2");
+        xhr.open("POST", this.loginData.host + "setReservation2");
         xhr.onload = () => {
           console.log(xhr.response);
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.loginData.collectionName,
+            collectionName: this.collectionName,
             token: this.loginData.token,
             performanceName: performanceName,
             seatNumber,
@@ -129,7 +121,7 @@ export default {
     getPerformanceList() {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "getPerformanceList");
+        xhr.open("POST", this.loginData.host + "getPerformanceList");
         xhr.onload = () => {
           console.log(xhr.response);
           try {
@@ -141,7 +133,7 @@ export default {
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.loginData.collectionName,
+            collectionName: this.collectionName,
             token: this.loginData.token
           })
         );

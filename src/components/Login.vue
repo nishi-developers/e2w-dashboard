@@ -13,9 +13,10 @@
       </span>
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-text-field
-          v-model="value.collectionName"
+          v-model="value.host"
           :rules="[rules.required]"
-          label="CollectionName"
+          label="URL"
+          hint="https://asia-northeast1-<プロジェクト名>.cloundfunctions.net/"
           required
         ></v-text-field>
         <v-text-field v-model="value.token" :rules="[rules.required]" type="Password" label="Token"></v-text-field>
