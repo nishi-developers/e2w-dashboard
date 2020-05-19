@@ -34,6 +34,7 @@
         @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
       ></main-card>
       <br />
+      <login-dialog />
     </v-app>
   </div>
 </template>
@@ -45,10 +46,12 @@ import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
 Vue.use(Vuetify);
 import MainCard from "./components/MainCard.vue";
+import LoginDialog from "./components/LoginDialog.vue";
 export default {
   name: "app",
   components: {
-    MainCard
+    MainCard,
+    LoginDialog
   },
   data() {
     return {
