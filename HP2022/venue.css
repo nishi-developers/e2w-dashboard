@@ -1,0 +1,227 @@
+body {
+    font-family: serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0;
+  background-color: #fff;
+  color: #000;
+}
+
+.theme {
+  font-family: "Avenir Next";
+  font-size: 32px;
+  padding-left: 20px;
+}
+
+.box {
+  width        : 20px;
+  height       : 20px;
+}
+.box:before {
+  content: "";
+  position: absolute;
+  width        : 25px;
+  height       : 25px;
+  background: #c94821;
+  box-shadow: 40px 0 0 #291e59,80px 0 0 #b63c2b,120px 0 0 #3f6735,160px 0 0 #cc9933,200px 0 0 #67402f,240px 0 0 #53b8c8
+}
+
+/* チェックボックスを非表示にする */
+.drawer_hidden {
+  display: none;
+}
+
+/* ハンバーガーアイコンの設置スペース */
+.drawer_open {
+  display: flex;
+  height: 60px;
+  width: 60px;
+  margin-left: 20vw;
+  padding-right: 10px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 100;/* 重なり順を一番上にする */
+  cursor: pointer;
+  background: #fff;
+}
+
+/* ハンバーガーメニューのアイコン */
+.drawer_open span,/* 三本線の真ん中の棒 */
+.drawer_open span:before,/* 三本線の一番上の棒 */
+.drawer_open span:after {/* 三本線の一番下の棒 */
+content: '';
+display: block;
+height: 4px;
+width: 35px;
+border-radius: 3px;
+background: #000;
+transition: 0.5s;
+position: absolute;
+}
+
+/* アイコンがクリックされたら色を反転 */
+#drawer_input:checked ~ .drawer_open span,
+#drawer_input:checked ~ .drawer_open span:before,
+#drawer_input:checked ~ .drawer_open span:after {
+  background: #53b8c8;
+}
+
+/* 三本線の棒の位置調整 */
+.drawer_open span:before {
+  bottom: 10px;
+}
+.drawer_open span:after {
+  top: 10px;
+}
+
+/* メニューのデザイン*/
+.nav_content {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 100%; /* メニューを画面の外に飛ばす */
+  z-index: 99;
+  background: #fff;
+  transition: .5s;
+}
+
+.nav_list {
+  list-style: none;
+  text-align: center;
+  font-size: 32px;
+}
+.nav_list * {
+  background: #fff;
+  color: #000;
+  padding-top: 100px;
+}
+
+/* アイコンがクリックされたらメニューを表示 */
+#drawer_input:checked ~ .nav_content {
+  left: 0;/* メニューを画面に入れる */
+}
+/* ヘッダー記述ここまで */
+
+
+.thempic img {
+    max-height: 570px;
+    max-width: 997px;
+    width: 100%; 
+  }
+
+.thempic p {
+    font-family: Serif;
+    position: absolute;
+    font-size: 60px;
+    font-weight: 500;
+    color: #000;
+    line-height: 30px;
+    padding-top: 40px;
+    padding-left: 20px;
+}
+.ki {
+    font-size: 140px;
+    color: #3f43a6;
+}
+
+.themtitle {
+    font-family: "Avenir Next";
+    font-size: 20px;
+    font-weight: 550;
+    color: #000;
+    padding-top: 20px;
+    padding-left: 20px;
+    display: flex;
+    align-items: center; /* 垂直中心 */
+
+  }
+  
+  .themsen,
+  .train,
+  .bus {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 30px;
+    color: #000;
+    padding-left: 40px;
+  }
+  .bus {
+    padding-bottom: 25px;
+  }
+
+  .themsen p,
+  .train p,
+  .bus p {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 10px;
+    padding-top: 20px;
+  }
+
+
+
+  /* コロナ対応について */
+  .informationc {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 15px 0 0 30px;
+    margin-top: 5px;
+    background-color: #3f43a6;
+    color: #fff;
+  }
+  .informationd {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 5px 0 20px 50px;
+    background-color: #3f43a6;
+    color: #fff;
+  }
+  .yellow {
+    color: #d3cf50;
+  }
+
+
+
+
+
+
+
+/* フッター */
+.footer {
+    background-color: #fff;
+    list-style: none;
+    font-family: "Avenir Next";
+  }
+  
+    .footer_list {
+      list-style: none;
+      font-size: 14px;
+      padding-left: 10px;
+    }
+
+
+/* 地図 */
+.mapcon {
+  font-family: "Avenir Next";
+  font-size: 20px;
+  font-weight: 300;
+  margin-left: 40px;
+  padding-top: 40px;
+}
+.map img {
+  max-height: 535px;
+  max-width: 940px;
+  width: 100%;
+  margin-left: 40px;
+  padding-bottom: 40px;
+}

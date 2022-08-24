@@ -1,0 +1,260 @@
+body {
+    font-family: serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0;
+  background-color: #fff;
+  color: #000;
+}
+
+.theme {
+  font-family: "Avenir Next";
+  font-size: 32px;
+  padding-left: 20px;
+}
+
+.box {
+  width        : 20px;
+  height       : 20px;
+}
+.box:before {
+  content: "";
+  position: absolute;
+  width        : 25px;
+  height       : 25px;
+  background: #c94821;
+  box-shadow: 40px 0 0 #291e59,80px 0 0 #b63c2b,120px 0 0 #3f6735,160px 0 0 #cc9933,200px 0 0 #67402f,240px 0 0 #53b8c8
+}
+
+/* チェックボックスを非表示にする */
+.drawer_hidden {
+  display: none;
+}
+
+/* ハンバーガーアイコンの設置スペース */
+.drawer_open {
+  display: flex;
+  height: 60px;
+  width: 60px;
+  margin-left: 20vw;
+  padding-right: 10px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 100;/* 重なり順を一番上にする */
+  cursor: pointer;
+  background: #fff;
+}
+
+/* ハンバーガーメニューのアイコン */
+.drawer_open span,/* 三本線の真ん中の棒 */
+.drawer_open span:before,/* 三本線の一番上の棒 */
+.drawer_open span:after {/* 三本線の一番下の棒 */
+content: '';
+display: block;
+height: 4px;
+width: 35px;
+border-radius: 3px;
+background: #000;
+transition: 0.5s;
+position: absolute;
+}
+
+/* アイコンがクリックされたら色を反転 */
+#drawer_input:checked ~ .drawer_open span,
+#drawer_input:checked ~ .drawer_open span:before,
+#drawer_input:checked ~ .drawer_open span:after {
+  background: #53b8c8;
+}
+
+/* 三本線の棒の位置調整 */
+.drawer_open span:before {
+  bottom: 10px;
+}
+.drawer_open span:after {
+  top: 10px;
+}
+
+/* メニューのデザイン*/
+.nav_content {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 100%; /* メニューを画面の外に飛ばす */
+  z-index: 99;
+  background: #fff;
+  transition: .5s;
+}
+
+.nav_list {
+  list-style: none;
+  text-align: center;
+  font-size: 32px;
+}
+.nav_list * {
+  background: #fff;
+  color: #000;
+  padding-top: 100px;
+}
+
+/* アイコンがクリックされたらメニューを表示 */
+#drawer_input:checked ~ .nav_content {
+  left: 0;/* メニューを画面に入れる */
+}
+/* ヘッダー記述ここまで */
+
+.thempic img {
+    max-height: 570px;
+    max-width: 997px;
+    width: 100%; 
+  }
+
+.thempic p {
+    font-family: Serif;
+    position: absolute;
+    font-size: 60px;
+    font-weight: 500;
+    color: #000;
+    line-height: 30px;
+    padding-top: 40px;
+    padding-left: 20px;
+}
+.ki {
+    font-size: 140px;
+    color: #3f43a6;
+}
+
+.link {
+  position: fixed; /* 要素の位置を固定する */
+  bottom: 0; /* 基準の位置を画面の一番下に指定する */
+  right: 0; /* 基準の位置を画面の一番右に指定する */
+  margin-bottom: 20px;
+  margin-right: 20px;
+}
+.link img {
+  height: 150px;
+  width: 180px;
+}
+
+
+/* フッター */
+.footer {
+    background-color: #fff;
+    list-style: none;
+    font-family: "Avenir Next";
+  }
+  
+    .footer_list {
+      list-style: none;
+      font-size: 14px;
+      padding-left: 10px;
+    }
+
+
+
+
+
+/* 団体紹介画像 */
+.cl-con img,
+.te-con img{
+    height: 216px;
+    width: 280px;
+    margin-left: 120px;
+    margin-top: 50px;
+    border: 5px solid #FFF;
+    box-shadow: 0 0 5px #999;
+}
+.cl-con li,
+.te-con li {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 10px;
+  list-style: none;
+}
+.side {
+  float: left;
+  margin-left: 40px;
+  margin-right: 80px;
+}
+.last {
+  margin-left: 40px;
+  margin-bottom: 80px;
+}
+
+
+/* クラス団体 */
+.box-cl {
+  width        : 20px;
+  height       : 20px;
+  margin-right: 10px;
+  background: #c94821;
+}
+.cl-tit {
+  font-size: 28px;
+  font-weight: 500;
+  margin-top: 40px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center; /* 垂直中心 */
+}
+.marker {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 30px;
+  background: linear-gradient(transparent 40%, #E7A594 80%);
+}
+
+/* 有志団体 */
+.box-te {
+  width        : 20px;
+  height       : 20px;
+  margin-right: 10px;
+  background: #53b8c8;
+}
+.te-tit {
+  font-size: 28px;
+  font-weight: 500;
+  margin-top: 80px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center; /* 垂直中心 */
+}
+.marke {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 30px;
+  background: linear-gradient(transparent 40%, #B7DBE3 80%);
+}
+.右改行 {
+  margin-left: 529px;
+}
+
+
+
+  /* コロナ対応について */
+  .informationc {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 15px 0 0 30px;
+    margin-top: 5px;
+    background-color: #3f43a6;
+    color: #fff;
+  }
+  .informationd {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 5px 0 20px 50px;
+    background-color: #3f43a6;
+    color: #fff;
+  }
+  .yellow {
+    color: #d3cf50;
+  }
+

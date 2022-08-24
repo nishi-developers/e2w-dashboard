@@ -1,0 +1,223 @@
+
+body {
+    font-family: "Avenir Next";
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0;
+  background-color: #fff;
+  color: #000;
+}
+
+.theme {
+  font-size: 32px;
+  padding-left: 20px;
+}
+
+.box {
+  width        : 20px;
+  height       : 20px;
+}
+.box:before {
+  content: "";
+  position: absolute;
+  width        : 25px;
+  height       : 25px;
+  background: #c94821;
+  box-shadow: 40px 0 0 #291e59,80px 0 0 #b63c2b,120px 0 0 #3f6735,160px 0 0 #cc9933,200px 0 0 #67402f,240px 0 0 #53b8c8
+}
+
+/* チェックボックスを非表示にする */
+.drawer_hidden {
+  display: none;
+}
+
+/* ハンバーガーアイコンの設置スペース */
+.drawer_open {
+  display: flex;
+  height: 60px;
+  width: 60px;
+  margin-left: 20vw;
+  padding-right: 10px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 100;/* 重なり順を一番上にする */
+  cursor: pointer;
+  background: #fff;
+}
+
+/* ハンバーガーメニューのアイコン */
+.drawer_open span,/* 三本線の真ん中の棒 */
+.drawer_open span:before,/* 三本線の一番上の棒 */
+.drawer_open span:after {/* 三本線の一番下の棒 */
+content: '';
+display: block;
+height: 4px;
+width: 35px;
+border-radius: 3px;
+background: #000;
+transition: 0.5s;
+position: absolute;
+}
+
+/* アイコンがクリックされたら色を反転 */
+#drawer_input:checked ~ .drawer_open span,
+#drawer_input:checked ~ .drawer_open span:before,
+#drawer_input:checked ~ .drawer_open span:after {
+  background: #53b8c8;
+}
+
+/* 三本線の棒の位置調整 */
+.drawer_open span:before {
+  bottom: 10px;
+}
+.drawer_open span:after {
+  top: 10px;
+}
+
+/* メニューのデザイン*/
+.nav_content {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 100%; /* メニューを画面の外に飛ばす */
+  z-index: 99;
+  background: #fff;
+  transition: .5s;
+}
+
+.nav_list {
+  list-style: none;
+  text-align: center;
+  font-size: 32px;
+}
+.nav_list * {
+  background: #fff;
+  color: #000;
+  padding-top: 100px;
+}
+
+/* アイコンがクリックされたらメニューを表示 */
+#drawer_input:checked ~ .nav_content {
+  left: 0;/* メニューを画面に入れる */
+}
+/* ヘッダー記述ここまで */
+
+
+
+
+
+/* フッター */
+.footer {
+  background-color: #fff;
+  list-style: none;
+}
+
+  .footer_list {
+    list-style: none;
+    font-size: 14px;
+    padding-left: 10px;
+  }
+
+
+/* メイン */
+.logopicture img {
+  max-height: 570px;
+  max-width: 997px;
+  width: 100%; 
+}
+
+.informationa {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  line-height: 30px;
+  padding: 0 20px;
+}
+.informationb {
+  font-size: 28px;
+  line-height: 32px;
+  padding: 0 0 40px 20px;
+}
+
+.white {
+  color: #fff;
+}
+
+/* コロナ対応について */
+.informationc {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 15px 0 0 30px;
+    margin-top: 5px;
+    background-color: #3f43a6;
+    color: #fff;
+}
+.informationd {
+    font-family: "Avenir Next";
+    font-size: 18px;
+    line-height: 30px;
+    padding: 5px 0 20px 50px;
+    background-color: #3f43a6;
+    color: #fff;
+}
+ .yellow {
+    color: #d3cf50;
+}
+
+.themtitle {
+  font-family: serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 垂直中心 */
+  padding: 40px 0 20px 0;
+}
+.themtitle:before {
+  border-top: 2px solid;
+  content: "";
+  width: 200px; /* 線の長さ */
+  color: #000;
+  margin-right: 1em;
+}
+.themtitle:after {
+  border-top: 2px solid;
+  content: "";
+  width: 200px; /* 線の長さ */
+  color: #000;
+  margin-left: 1em;
+}
+
+
+  .informatione img,
+  .informationf img,
+  .informationg img {
+    width: 100%; 
+    max-height: 300px;
+    max-width: 1100px;
+    object-position: 0 50%;
+    padding: 20px 0 20px 0;
+   }
+
+
+
+
+.informatione p,
+.informationf p,
+.informationg p {
+  position: absolute;
+  font-size: 32px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 30px;
+  padding: 2vw 0 0 20px;
+  text-shadow: 2px 2px 2px #3f43a6;
+}
