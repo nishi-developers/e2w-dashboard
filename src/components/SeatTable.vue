@@ -1,18 +1,28 @@
 <template>
-  <table @mouseleave="setActive(-1)">
-    <tr v-for="(row, i) in formation">
-      <td
-        class="cell"
-        v-for="(cell, j) in row"
-        :style="{ backgroundColor: backgroundColor(cell, i * row.length + j) , color: textColor(cell)}"
-        @mouseover="setActive(i * row.length + j)"
-        @click="$emit('cellclicked', i, j)"
+  <div>
+    <div class="wrapper">
+      <v-card
+        class="pl-3 mx-auto"
+        :width="formation[0].length*40"
+        flat
+        max-width="none"
+        max-height="50vh"
       >
-        {{ i * row.length + j}}
-        <div class="fukidashi" v-if="isActive(i * row.length + j)">{{ text(i * row.length + j) }}</div>
-      </td>
-    </tr>
-  </table>
+        <v-row v-for="(row, i) in formation" :key="i">
+          <v-col v-for="(cell, j) in row" :key="j" class="seat-col">
+            <v-card
+              tile
+              flat
+              class="text-center"
+              :color="backgroundColor(cell, i * row.length + j + 1)"
+              dark
+              @click.stop="$emit('cellclicked', i, j)"
+            >{{ i * row.length + j + 1}}</v-card>
+          </v-col>
+        </v-row>
+      </v-card>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -23,31 +33,13 @@ export default {
     formation: Array,
     seats: Object
   },
-  data: function() {
-    return {
-      activenum: -1
-    };
-  },
   methods: {
-    text(index) {
-      const seat = this.seats[index];
-      if (seat) {
-        return seat["id"];
-      }
-      return "";
-    },
     backgroundColor(cell, index) {
       const colorIndex = this.seats[index] ? 0 : cell;
       return fillstyles[colorIndex];
     },
     textColor(cell) {
       return textfillstyles[cell === 0 ? 0 : 1];
-    },
-    isActive(index) {
-      return this.text(index) !== "" && index === this.activenum;
-    },
-    setActive(index) {
-      this.activenum = index;
     }
   }
 };
@@ -83,5 +75,11 @@ td {
   border-width: 10px;
   pointer-events: none;
   content: " ";
+}
+.seat-col {
+  padding: 2px;
+}
+.wrapper {
+  overflow: auto;
 }
 </style>

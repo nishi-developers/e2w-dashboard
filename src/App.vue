@@ -1,163 +1,165 @@
 <template>
   <div id="app">
     <v-app>
-      <v-form v-model="valid">
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="5" sm="5">
-              <v-text-field
-                v-model="info.collectionName"
-                :rules="[rules.required]"
-                label="CollectionName"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="5" sm="5">
-              <v-text-field
-                v-model="info.token"
-                :rules="[rules.required]"
-                :type="password"
-                label="Token"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="2" sm="2">
-              <v-btn block @click="update()" height="50px">OK</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-form>
+      <div v-if="logined">
+        <v-app-bar app color="secondary" dark>
+          <v-toolbar-title class="ml-2">サイコの予約</v-toolbar-title>
 
-      <!--カード!-->
-      <main-card
-        :info="info"
-        @addPerformance="(performanceName, date, formation) => {this.makePerformance(performanceName, date, formation);this.update();}"
-        @setReservation="(item, seatNumber, userId) => {this.info.seatNumber=seatNumber;this.info.userId=userId;if(!setReservation(item))update();}"
-      ></main-card>
-      <br />
+          <v-spacer></v-spacer>
+
+          <v-btn light @click="logout()">ログアウト</v-btn>
+        </v-app-bar>
+        <v-content>
+          <v-container fluid>
+            <main-card
+              :performanceList="performanceList"
+              :loading="loading"
+              :failed="failed"
+              :failedMessage="failedMessage"
+              @failedDone="failed = false"
+              @addPerformance="
+            (performanceName, date, formation) => {
+              makePerformance(performanceName, date, formation);
+            }
+          "
+              @setReservation="
+            (item, seatNumber, userId) => {
+              setReservation(item, seatNumber, userId);
+            }
+          "
+            ></main-card>
+          </v-container>
+        </v-content>
+      </div>
+      <login v-else v-model="loginData" @done="update()" :failed="failed" :loading="loading"></login>
     </v-app>
   </div>
 </template>
 
 <script>
-const host = "https://asia-northeast1-easy-to-wait.cloudfunctions.net/";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
 Vue.use(Vuetify);
 import MainCard from "./components/MainCard.vue";
+import Login from "./components/Login.vue";
 export default {
   name: "app",
   components: {
-    MainCard
+    MainCard,
+    Login
   },
   data() {
     return {
-      info: {
-        formations: [],
-        seats: [],
-        collectionName: "",
-        token: "",
-        seatNumber: 0,
-        userId: "",
-        formation_str: "",
-        performanceList: []
+      loginData: {
+        host: "",
+        token: ""
       },
-      valid: false,
-      collectionNameRules: [v => !!v || "CollectionName is required"],
-      tokenRules: [v => !!v || "Token is required"],
-      password: "Password",
-      rules: {
-        required: value => !!value || "Required."
-      },
-      right: null
+      collectionName: "psychopath",
+      performanceList: [],
+      logined: false,
+      failed: false,
+      failedMessage: "",
+      loading: false
     };
   },
   methods: {
     update() {
-      this.getPerformanceList().then(() => {
-        for (let performanceName in this.info.performanceList) {
-          this.getPerformance(performanceName);
-        }
-      });
+      this.loading = true;
+      this.getPerformanceList()
+        .then(() => {
+          this.logined = true;
+          this.loading = false;
+        })
+        .catch(() => {
+          this.failed = true;
+          this.loading = false;
+        });
     },
-    getPerformance(performanceName) {
+    logout() {
+      this.loginData.host = "";
+      this.loginData.token = "";
+      this.failed = false;
+      this.logined = false;
+    },
+    makePerformance(performanceName, date, formation) {
+      this.loading = true;
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", host + "getPerformance");
+      xhr.open(
+        "POST",
+        "https://asia-northeast1-" +
+          this.loginData.host +
+          ".cloudfunctions.net/makePerformance"
+      );
       xhr.onload = () => {
         console.log(xhr.response);
-        const data = JSON.parse(xhr.response);
-        this.info.formations[performanceName] =
-          typeof data.formation === "undefined" || data.formation === ""
-            ? []
-            : JSON.parse(data.formation);
-        this.info.seats[performanceName] = data.seats;
-        this.info.seats.splice(); //This code is necessary to reflect changes
+        if (xhr.response === "success") {
+          this.update();
+        } else {
+          this.failedMessage = xhr.response;
+          this.failed = true;
+        }
       };
       xhr.send(
         JSON.stringify({
-          collectionName: this.info.collectionName,
-          token: this.info.token,
-          performanceName: performanceName
+          collectionName: this.collectionName,
+          token: this.loginData.token,
+          performanceName: performanceName,
+          formation: JSON.stringify(formation),
+          date: date
         })
       );
     },
-    makePerformance(performanceName, date, formation) {
-      if (this.performanceName === "") {
-        alert("PerformanceNameを入力してください");
-      } else {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "makePerformance");
-        xhr.onload = () => {
-          console.log(xhr.response);
-        };
-        xhr.send(
-          JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token,
-            performanceName: performanceName,
-            formation: JSON.stringify(formation),
-            date: date
-          })
-        );
-      }
-    },
-    setReservation(performanceName) {
-      let flag = false;
-      if (this.info.userId === "") {
-        alert("UserIdを入力してください");
-        flag = true;
-      }
-      if (!flag) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "setReservation2");
-        xhr.onload = () => {
-          console.log(xhr.response);
-        };
-        xhr.send(
-          JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token,
-            performanceName: performanceName,
-            seatNumber: this.info.seatNumber,
-            seat: { type: "line", id: this.info.userId }
-          })
-        );
-      }
-      return flag;
+    setReservation(performanceName, id, seatNumber) {
+      this.loading = true;
+      const xhr = new XMLHttpRequest();
+      xhr.open(
+        "POST",
+        "https://asia-northeast1-" +
+          this.loginData.host +
+          ".cloudfunctions.net/setReservation2"
+      );
+      xhr.onload = () => {
+        console.log(xhr.response);
+        if (xhr.response === "success") {
+          this.update();
+        } else {
+          this.failedMessage = xhr.response;
+          this.failed = true;
+        }
+      };
+      xhr.send(
+        JSON.stringify({
+          collectionName: this.collectionName,
+          token: this.loginData.token,
+          performanceName: performanceName,
+          seatNumber,
+          seat: { type: "line", id }
+        })
+      );
     },
     getPerformanceList() {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", host + "getPerformanceList");
+        xhr.open(
+          "POST",
+          "https://asia-northeast1-" +
+            this.loginData.host +
+            ".cloudfunctions.net/getPerformanceList"
+        );
         xhr.onload = () => {
           console.log(xhr.response);
-          this.info.performanceList = JSON.parse(xhr.response);
+          try {
+            this.performanceList = JSON.parse(xhr.response);
+          } catch (e) {
+            reject();
+          }
           resolve();
         };
         xhr.send(
           JSON.stringify({
-            collectionName: this.info.collectionName,
-            token: this.info.token
+            collectionName: this.collectionName,
+            token: this.loginData.token
           })
         );
       });
@@ -166,5 +168,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>
